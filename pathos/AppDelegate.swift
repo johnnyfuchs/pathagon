@@ -13,13 +13,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                             
     var window: UIWindow?
 
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: NSDictionary?) -> Bool {
-        self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
+        window = UIWindow(frame: UIScreen.mainScreen().bounds)
         // Override point for customization after application launch.
-        self.window!.backgroundColor = UIColor.whiteColor()
-        self.window!.makeKeyAndVisible()
-        return true
+        if let window = self.window {
+
+            window.rootViewController = RootViewController()
+            window.backgroundColor = UIColor.whiteColor()
+            window.makeKeyAndVisible()
+            
+            return true
+        }
+        return false
     }
 
     func applicationWillResignActive(application: UIApplication) {
