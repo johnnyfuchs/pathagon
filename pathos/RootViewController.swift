@@ -6,9 +6,17 @@
 //  Copyright (c) 2014 beergrammer. All rights reserved.
 //
 
+// TODO: Come up with a "Turn" system
+
+
 import Foundation
 import UIKit
 import Darwin
+
+
+func + (lhs:Position, rhs:Position) -> Position {
+    return Position(lhs.x + rhs.x, lhs.y + lhs.y)
+}
 
 
 struct Position {
@@ -17,11 +25,31 @@ struct Position {
     func description() -> String {
         return "x:\(x) y:\(y)"
     }
+    init(_ x:Int,_ y:Int){
+        self.x = x
+        self.y = y
+    }
+}
+
+enum Direction {
+    case N, NE, E, SE, S, SW, W, NW
+    
+    func toCoord() -> Position {
+        switch self {
+            case .N:  return Position(-1, 0)
+            case .NE: return Position(-1, 1)
+            case .E:  return Position(0 , 1)
+            case .SE: return Position(1 , 1)
+            case .S:  return Position(0 , 1)
+            case .SW: return Position(-1, 1)
+            case .W:  return Position(0 ,-1)
+            case .NW: return Position(-1,-1)
+        }
+    }
 }
 
 enum PlayerType {
-    case White
-    case Black
+    case White, Black
     
     func description() -> String {
         switch self {
@@ -29,6 +57,17 @@ enum PlayerType {
                 return "White"
         case .Black:
                 return "Black"
+        }
+    }
+    
+    func string(type:String) -> PlayerType {
+        switch type {
+            case "White":
+                return White
+            case "Black":
+                return Black
+            default:
+                return White
         }
     }
 }
@@ -39,17 +78,40 @@ func == (lhs: Player, rhs: Player) -> Bool {
 }
 
 class Player:Equatable {
+    
+    let startingPieces = 14
+    
     var name:String
     var type:PlayerType
+    var pieces:[Piece] = []
     
     init(name:String, type:PlayerType){
         self.name = name
         self.type = type
+        
+        println(type.description())
+        
+        for _ in 0...startingPieces {
+            pieces += Piece(player: self)
+        }
+    }
+    
+    func drawPiece() -> Piece? {
+        if pieces.count > 0 {
+            let piece = pieces[0]
+            pieces.removeAtIndex(0)
+            return piece
+        }
+        return nil
     }
     
     func description() -> String {
-        return "name:\(name) y:\(type.description())"
+        return "name: \(name) side: \(type.description())"
     }
+}
+
+enum TurnAction {
+    case BeginTurn, PlayPiece, PickupPiece, EndTurn, InvalidMove, Win, Lose
 }
 
 class Piece {
@@ -72,13 +134,10 @@ class Piece {
 }
 
 class Move {
-    
-    var player:Player
     var piece:Piece
     var to:Position
     
-    init(player:Player, piece:Piece, to:Position){
-        self.player = player
+    init(piece:Piece, to:Position){
         self.piece = piece
         self.to = to
     }
@@ -88,7 +147,7 @@ class Move {
     }
     
     func description() -> String {
-        return "player: {\(player.description())}, piece: \(piece.description()), lastPosition: \(to.description())"
+        return "piece: \(piece.description()),\n lastPosition: \(to.description())"
     }
 }
 
@@ -99,37 +158,28 @@ class Game {
     var players:[Player]
     var turn:Player
     
-    init(board:Board, players:Array<Player>){
+    
+    init(board:Board, players:[Player]){
         self.board = board
         self.players = players
         turn = players[0]
     }
     
-    func makeMove(move:Move) -> Bool {
+    func attemptTurnAction(action:TurnAction, player:Player){
+        
+    }
+    
+    func attemptMove(move:Move){
+        if !board.isValidMove(move) {        }
+        
+        move.complete()
 
-        if isValidMove(move) {
-            move.complete()
-            moves += move
-            return true
-        }
-        return false
     }
     
-    func isValidMove(move:Move) -> Bool {
-        
-        for piece in board.pieces {
-            if move.to.x == piece.position?.x || move.to.y == piece.position?.y {
-                return false
-            }
-        }
-        
-        return move.to.x >= 0 && move.to.x < board.columns && move.to.y >= 0 && move.to.y < board.rows
-    }
-    
-    func nextTurn() -> Player {
+    func nextPlayerAction() -> (player:Player, action:TurnAction) {
         let next = turn == players[0] ? players[1] : players[0]
         turn = next
-        return next
+        return (next, .EndTurn)
     }
 }
 
@@ -143,13 +193,33 @@ class Board {
         self.columns = columns;
         self.rows = rows
     }
+    
+    func isValidMove(move:Move) -> Bool {
+        
+        for piece in pieces {
+            if move.to.x == piece.position?.x && move.to.y == piece.position?.y {
+                return false
+            }
+        }
+        
+        return move.to.x >= 0 && move.to.x < columns && move.to.y >= 0 && move.to.y < rows
+    }
+    
+    func piecesFrom(point:Point, inDirections:[Direction]) -> [Piece] {
+        return [Piece(player: Player(name: "as", type: .White))]
+    }
+    
+    func pieceFrom(point:Point, dir:Direction) -> Piece? {
+        
+        return Piece(player: Player(name: "as", type: .White))
+    }
 }
 
 
 class BoardView: UIView {
     var game:Game
     
-    var onTileTapped:(col:Int, row:Int) -> ()
+    var onTileTapped:(pos:Position) -> ()
     
     // local vars
     var tileViews:Array<Array<UIView>> = []
@@ -170,7 +240,7 @@ class BoardView: UIView {
             tileViews += tileRowViews
         }
         
-        self.onTileTapped = {(col:Int, row:Int) in }
+        self.onTileTapped = {(pos:Position) in }
         
         super.init(frame: frame)
         
@@ -188,9 +258,8 @@ class BoardView: UIView {
     }
     
     override func layoutSubviews() {
-        drawBoard()
-        drawPieces()
         super.layoutSubviews()
+        render()
     }
     
     
@@ -198,9 +267,13 @@ class BoardView: UIView {
         let point = sender.locationInView(self)
         let col = Int(floor((point.x / frame.width) * CGFloat(game.board.columns)))
         let row = Int(floor((point.y / frame.height) * CGFloat(game.board.rows)))
-        self.onTileTapped(col: col, row: row)
+        self.onTileTapped(pos:Position(col, row))
     }
     
+    func render() {
+        drawBoard()
+        drawPieces()
+    }
     
     func drawPieces(){
         for p in game.board.pieces {
@@ -214,15 +287,15 @@ class BoardView: UIView {
                 let frame = rectForTileAt(pos.y, pos.x)
                 let pieceView = UIView(frame: frame)
                 pieceView.layer.cornerRadius = frame.width / 2.0
-                pieceView.backgroundColor = UIColor.orangeColor()
+                pieceView.backgroundColor = piece.player.type == .Black ? UIColor.orangeColor() : UIColor.magentaColor()
                 self.addSubview(pieceView)
             }
         }
     }
     
-    func rectForTileAt(column:Int, _ row:Int) -> CGRect {
+    func rectForTileAt(row:Int, _ col:Int) -> CGRect {
         let size = tileSize()
-        return CGRectMake(CGFloat(column) * size.width, CGFloat(row) * size.height, size.width, size.height)
+        return CGRectMake(CGFloat(col) * size.width, CGFloat(row) * size.height, size.width, size.height)
     }
     
     func tileSize() -> CGSize {
@@ -242,21 +315,26 @@ class BoardView: UIView {
         
         for row:Int in 0...rows {
             for col:Int in 0...columns {
-                tileViews[row][col].frame = rectForTileAt(col, row)
+                tileViews[row][col].frame = rectForTileAt(row, col)
                 tileViews[row][col].backgroundColor = colorAt(row, col)
             }
         }
     }
     
     func colorAt( row:Int, _ col:Int) -> UIColor {
-        return ((row % 2 == 0) && !(col % 2 == 0)) || (!(row % 2 == 0) && (col % 2 == 0)) ? UIColor.whiteColor() : UIColor.blackColor()
+        return ((row % 2 == 0) && !(col % 2 == 0)) || (!(row % 2 == 0) && (col % 2 == 0)) ? UIColor.whiteColor() : UIColor.lightGrayColor()
     }
+    
+    func afterMove(move:Move) {
+        
+        // check for victory
+        
+        // remove sandwiched pieces
+        
+    }
+    
+    
 }
-
-
-
-
-
 
 class RootViewController: UIViewController {
     
@@ -273,13 +351,26 @@ class RootViewController: UIViewController {
         var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), game: game)
         view.addSubview(boardView)
         
-        boardView.onTileTapped = { (col:Int, row:Int) in
+        boardView.onTileTapped = { (pos:Position) in
             
-            let player = game.nextTurn()
-            let piece = Piece(player: player)
-            let move = Move(player: player, piece: piece, to: Position(x: col, y: row))
-            game.makeMove(move)
-            boardView.layoutSubviews()
+            var num:Int? = "cat".toInt()?
+            
+            if let knownNum = num {
+                knownNum + 10
+            }
+            
+            
+            
+            // if the player still has pieces
+            if game.turn.pieces.count > 0 {
+                
+                if let piece = game.turn.drawPiece() {
+//                    let move = Move(player: game.turn, piece: piece, to: Position(pos.x, pos.y))
+//                    game.attemptMove(move)
+//                    boardView.render()
+                }
+            }
+
         }
     }
 }
