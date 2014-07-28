@@ -14,6 +14,10 @@ import UIKit
 import Darwin
 
 
+func == (lhs:Position, rhs:Position) -> Bool {
+    return lhs.x == rhs.x && lhs.y == rhs.y
+}
+
 func + (lhs:Position, rhs:Position) -> Position {
     return Position(lhs.x + rhs.x, lhs.y + lhs.y)
 }
@@ -48,7 +52,7 @@ enum Direction {
     }
 }
 
-enum PlayerType {
+enum PlayerColor {
     case White, Black
     
     func description() -> String {
@@ -60,7 +64,7 @@ enum PlayerType {
         }
     }
     
-    func string(type:String) -> PlayerType {
+    func string(type:String) -> PlayerColor {
         switch type {
             case "White":
                 return White
@@ -73,23 +77,24 @@ enum PlayerType {
 }
 
 
+
 func == (lhs: Player, rhs: Player) -> Bool {
-    return lhs.type == rhs.type
+    return lhs.color == rhs.color
 }
+
+
 
 class Player:Equatable {
     
     let startingPieces = 14
     
     var name:String
-    var type:PlayerType
+    var color:PlayerColor
     var pieces:[Piece] = []
     
-    init(name:String, type:PlayerType){
+    init(name:String, color:PlayerColor){
         self.name = name
-        self.type = type
-        
-        println(type.description())
+        self.color = color
         
         for _ in 0...startingPieces {
             pieces += Piece(player: self)
@@ -106,30 +111,25 @@ class Player:Equatable {
     }
     
     func description() -> String {
-        return "name: \(name) side: \(type.description())"
+        return "name: \(name) side: \(color.description())"
     }
 }
 
-enum TurnAction {
-    case BeginTurn, PlayPiece, PickupPiece, EndTurn, InvalidMove, Win, Lose
+func == (lhs: Piece, rhs: Piece) -> Bool {
+    return lhs.position! == rhs.position! && lhs.player == rhs.player;
 }
-
+    
 class Piece {
-    var lastPosition:Position?
     var position:Position?
     var player:Player
+    var highlight:Bool = false
     
     init(player:Player){
         self.player = player
     }
     
-    func moveTo(pos:Position) {
-        self.lastPosition = self.position
-        self.position = pos
-    }
-    
     func description() -> String {
-        return "player: {\(player.description())}, position: \(position?.description()), lastPosition: \(lastPosition?.description())"
+        return "player: {\(player.description())}, position: \(position?.description())"
     }
 }
 
@@ -143,75 +143,112 @@ class Move {
     }
     
     func complete(){
-        piece.moveTo(to)
+        piece.position = to
     }
     
     func description() -> String {
-        return "piece: \(piece.description()),\n lastPosition: \(to.description())"
+        return "piece: \(piece.description()),\n target: \(to.description())"
     }
+}
+
+class Path {
+    var pieces:[Piece] = []
 }
 
 
 class Game {
     var board:Board
-    var moves:[Move] = []
     var players:[Player]
     var turn:Player
     
-    
-    init(board:Board, players:[Player]){
+    init(board:Board){
         self.board = board
-        self.players = players
+        
+        players = [
+            Player(name: "Hey", color: PlayerColor.White),
+            Player(name: "You", color: PlayerColor.Black)
+        ]
+        
         turn = players[0]
     }
     
-    func attemptTurnAction(action:TurnAction, player:Player){
-        
+    func nextPlayer() -> Player {
+        return turn == players[0] ? players[1] : players[0]
     }
     
-    func attemptMove(move:Move){
-        if !board.isValidMove(move) {        }
+    func playMove(move:Move) -> Bool {
+        
+        if !board.isValidMove(move) {
+            return false
+        }
         
         move.complete()
+        println(move.piece.position?.description())
+        if !move.piece.highlight {
+            board.pieces += move.piece
+        } else {
+            move.piece.highlight = false
+        }
 
+        println(board.pieces.count)
+
+        return true
     }
     
-    func nextPlayerAction() -> (player:Player, action:TurnAction) {
-        let next = turn == players[0] ? players[1] : players[0]
-        turn = next
-        return (next, .EndTurn)
-    }
 }
 
 class Board {
     
-    var rows = 8
-    var columns = 8
+    var size = 8
     var pieces:[Piece] = []
+    let goals:[Direction] = [.N, .S, .E, .W]
     
-    init(rows :Int, columns:Int){
-        self.columns = columns;
-        self.rows = rows
+    init(size:Int){
+        self.size = size;
+    }
+    
+    func highlightedPiece() -> Piece? {
+        for piece in pieces {
+            if piece.highlight {
+                return piece
+            }
+        }
+        return nil
     }
     
     func isValidMove(move:Move) -> Bool {
-        
         for piece in pieces {
             if move.to.x == piece.position?.x && move.to.y == piece.position?.y {
                 return false
             }
         }
         
-        return move.to.x >= 0 && move.to.x < columns && move.to.y >= 0 && move.to.y < rows
+        return move.to.x >= 0 && move.to.x < size && move.to.y >= 0 && move.to.y < size
     }
     
-    func piecesFrom(point:Point, inDirections:[Direction]) -> [Piece] {
-        return [Piece(player: Player(name: "as", type: .White))]
+    func pieceAt(position:Position) -> Piece? {
+        for piece:Piece in pieces {
+            if piece.position! == position {
+                return piece
+            }
+        }
+        return nil
     }
     
-    func pieceFrom(point:Point, dir:Direction) -> Piece? {
-        
-        return Piece(player: Player(name: "as", type: .White))
+    func piecesFrom(point:Position, directions:[Direction]) -> [Piece] {
+        var matches:[Piece] = []
+        for piece in pieces {
+            for direction in directions {
+                if let match = pieceFrom(point, direction: direction) {
+                    matches += match
+                }
+            }
+        }
+        return matches
+    }
+    
+    func pieceFrom(point:Position, direction:Direction) -> Piece? {
+        return pieceAt(point + direction.toCoord())
     }
 }
 
@@ -222,17 +259,17 @@ class BoardView: UIView {
     var onTileTapped:(pos:Position) -> ()
     
     // local vars
-    var tileViews:Array<Array<UIView>> = []
+    var tileViews:[[UIView]] = []
     var tapRecognizer:UITapGestureRecognizer?
 
     init(frame: CGRect, game:Game){
         self.game = game
         
-        for row in 0...game.board.rows {
+        for row in 0...game.board.size {
             
-            var tileRowViews:Array<UIView> = []
+            var tileRowViews:[UIView] = []
             
-            for col in 0...game.board.columns {
+            for col in 0...game.board.size {
                 var tileView = UIView(frame: CGRectZero)
                 tileRowViews += tileView
             }
@@ -249,28 +286,26 @@ class BoardView: UIView {
         
         tapRecognizer = UITapGestureRecognizer(target: self, action: "handleTap:")
         addGestureRecognizer(tapRecognizer)
-        
-        for tileRowViews in tileViews {
-            for tileView in tileRowViews {
-                self.addSubview(tileView)
-            }
-        }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        render()
     }
     
     
     func handleTap(sender: UITapGestureRecognizer){
         let point = sender.locationInView(self)
-        let col = Int(floor((point.x / frame.width) * CGFloat(game.board.columns)))
-        let row = Int(floor((point.y / frame.height) * CGFloat(game.board.rows)))
+        let col = Int(floor((point.x / frame.width) * CGFloat(game.board.size)))
+        let row = Int(floor((point.y / frame.height) * CGFloat(game.board.size)))
         self.onTileTapped(pos:Position(col, row))
     }
     
     func render() {
+
+        for subview in subviews {
+            subview.removeFromSuperview()
+        }
+        
         drawBoard()
         drawPieces()
     }
@@ -287,7 +322,10 @@ class BoardView: UIView {
                 let frame = rectForTileAt(pos.y, pos.x)
                 let pieceView = UIView(frame: frame)
                 pieceView.layer.cornerRadius = frame.width / 2.0
-                pieceView.backgroundColor = piece.player.type == .Black ? UIColor.orangeColor() : UIColor.magentaColor()
+                pieceView.backgroundColor = piece.player.color == .Black ? UIColor.orangeColor() : UIColor.magentaColor()
+                if piece.highlight {
+                    pieceView.backgroundColor = UIColor.yellowColor()
+                }
                 self.addSubview(pieceView)
             }
         }
@@ -299,15 +337,15 @@ class BoardView: UIView {
     }
     
     func tileSize() -> CGSize {
-        let w = frame.size.width / CGFloat(game.board.columns)
-        let h = frame.size.height / CGFloat(game.board.rows)
+        let w = frame.size.width / CGFloat(game.board.size)
+        let h = frame.size.height / CGFloat(game.board.size)
         
         return CGSize(width: w, height: h)
     }
     
     func drawBoard(){
-        var columns = game.board.columns
-        var rows = game.board.rows
+        var columns = game.board.size
+        var rows = game.board.size
         
         let size = tileSize()
         let w = size.width
@@ -319,21 +357,17 @@ class BoardView: UIView {
                 tileViews[row][col].backgroundColor = colorAt(row, col)
             }
         }
+        
+        for tileRowViews in tileViews {
+            for tileView in tileRowViews {
+                self.addSubview(tileView)
+            }
+        }
     }
     
     func colorAt( row:Int, _ col:Int) -> UIColor {
         return ((row % 2 == 0) && !(col % 2 == 0)) || (!(row % 2 == 0) && (col % 2 == 0)) ? UIColor.whiteColor() : UIColor.lightGrayColor()
     }
-    
-    func afterMove(move:Move) {
-        
-        // check for victory
-        
-        // remove sandwiched pieces
-        
-    }
-    
-    
 }
 
 class RootViewController: UIViewController {
@@ -341,36 +375,44 @@ class RootViewController: UIViewController {
     override func viewDidLoad(){
         super.viewDidLoad()
         
-        let playerA = Player(name: "A", type: PlayerType.Black)
-        let playerB = Player(name: "B", type: PlayerType.White)
-     
-        let board = Board(rows: 8, columns: 8)
+        let board = Board(size: 7)
         
-        let game = Game(board: board, players: [playerA, playerB])
+        let game = Game(board: board)
         
         var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), game: game)
         view.addSubview(boardView)
         
+        boardView.render()
         boardView.onTileTapped = { (pos:Position) in
-            
-            var num:Int? = "cat".toInt()?
-            
-            if let knownNum = num {
-                knownNum + 10
-            }
-            
-            
-            
-            // if the player still has pieces
-            if game.turn.pieces.count > 0 {
-                
-                if let piece = game.turn.drawPiece() {
-//                    let move = Move(player: game.turn, piece: piece, to: Position(pos.x, pos.y))
-//                    game.attemptMove(move)
-//                    boardView.render()
+
+            if let piece = game.board.pieceAt(pos) {
+                if let highlightedPiece = board.highlightedPiece() {
+                    if piece == highlightedPiece {
+                         piece.highlight = false
+                    }
+                }
+                else {
+                    piece.highlight = piece.player == game.turn
                 }
             }
+            
+            else {
+                
+                var move = Move(piece: Piece(player: game.turn), to: pos)
+                
+                if let highlightedPiece = board.highlightedPiece() {
+                    move = Move(piece: highlightedPiece, to: pos)
+                }
+                
+                if game.playMove(move) {
+                    game.turn = game.nextPlayer()
+                }
+                
+                println(move.description())
+            }
 
+            
+            boardView.render()
         }
     }
 }
