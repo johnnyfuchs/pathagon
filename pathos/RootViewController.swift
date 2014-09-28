@@ -97,7 +97,7 @@ class Player:Equatable {
         self.color = color
         
         for _ in 0...startingPieces {
-            pieces += Piece(player: self)
+            pieces.append(Piece(player: self))
         }
     }
     
@@ -185,7 +185,7 @@ class Game {
         move.complete()
         println(move.piece.position?.description())
         if !move.piece.highlight {
-            board.pieces += move.piece
+            board.pieces.append(move.piece)
         } else {
             move.piece.highlight = false
         }
@@ -240,7 +240,7 @@ class Board {
         for piece in pieces {
             for direction in directions {
                 if let match = pieceFrom(point, direction: direction) {
-                    matches += match
+                    matches.append(match)
                 }
             }
         }
@@ -271,10 +271,10 @@ class BoardView: UIView {
             
             for col in 0...game.board.size {
                 var tileView = UIView(frame: CGRectZero)
-                tileRowViews += tileView
+                tileRowViews.append(tileView)
             }
 
-            tileViews += tileRowViews
+            tileViews.append(tileRowViews)
         }
         
         self.onTileTapped = {(pos:Position) in }
@@ -285,9 +285,13 @@ class BoardView: UIView {
         clipsToBounds = true
         
         tapRecognizer = UITapGestureRecognizer(target: self, action: "handleTap:")
-        addGestureRecognizer(tapRecognizer)
+        addGestureRecognizer(tapRecognizer!)
     }
-    
+
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
     }
