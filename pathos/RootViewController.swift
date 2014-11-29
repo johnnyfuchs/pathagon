@@ -78,6 +78,43 @@ enum PlayerColor {
 
 
 
+func == (lhs: Player, rhs: Player) -> Bool {
+    return lhs.color == rhs.color
+}
+
+
+
+class Player:Equatable {
+    
+    let startingPieces = 14
+    
+    var name:String
+    var color:PlayerColor
+    var pieces:[Piece] = []
+    
+    init(name:String, color:PlayerColor){
+        self.name = name
+        self.color = color
+        
+        for _ in 0...startingPieces {
+            pieces.append(Piece(player: self))
+        }
+    }
+    
+    func drawPiece() -> Piece? {
+        if pieces.count > 0 {
+            let piece = pieces[0]
+            pieces.removeAtIndex(0)
+            return piece
+        }
+        return nil
+    }
+    
+    func description() -> String {
+        return "name: \(name) side: \(color.description())"
+    }
+}
+
 func == (lhs: Piece, rhs: Piece) -> Bool {
     return lhs.position! == rhs.position! && lhs.player == rhs.player;
 }
@@ -116,6 +153,103 @@ class Move {
 
 class Path {
     var pieces:[Piece] = []
+}
+
+
+class Game {
+    var board:Board
+    var players:[Player]
+    var turn:Player
+    
+    init(board:Board){
+        self.board = board
+        
+        players = [
+            Player(name: "Hey", color: PlayerColor.White),
+            Player(name: "You", color: PlayerColor.Black)
+        ]
+        
+        turn = players[0]
+    }
+    
+    func nextPlayer() -> Player {
+        return turn == players[0] ? players[1] : players[0]
+    }
+    
+    func playMove(move:Move) -> Bool {
+        
+        if !board.isValidMove(move) {
+            return false
+        }
+        
+        move.complete()
+        println(move.piece.position?.description())
+        if !move.piece.highlight {
+            board.pieces.append(move.piece)
+        } else {
+            move.piece.highlight = false
+        }
+
+        println(board.pieces.count)
+
+        return true
+    }
+    
+}
+
+class Board {
+    
+    var size = 8
+    var pieces:[Piece] = []
+    let goals:[Direction] = [.N, .S, .E, .W]
+    
+    init(size:Int){
+        self.size = size;
+    }
+    
+    func highlightedPiece() -> Piece? {
+        for piece in pieces {
+            if piece.highlight {
+                return piece
+            }
+        }
+        return nil
+    }
+    
+    func isValidMove(move:Move) -> Bool {
+        for piece in pieces {
+            if move.to.x == piece.position?.x && move.to.y == piece.position?.y {
+                return false
+            }
+        }
+        
+        return move.to.x >= 0 && move.to.x < size && move.to.y >= 0 && move.to.y < size
+    }
+    
+    func pieceAt(position:Position) -> Piece? {
+        for piece:Piece in pieces {
+            if piece.position! == position {
+                return piece
+            }
+        }
+        return nil
+    }
+    
+    func piecesFrom(point:Position, directions:[Direction]) -> [Piece] {
+        var matches:[Piece] = []
+        for piece in pieces {
+            for direction in directions {
+                if let match = pieceFrom(point, direction: direction) {
+                    matches.append(match)
+                }
+            }
+        }
+        return matches
+    }
+    
+    func pieceFrom(point:Position, direction:Direction) -> Piece? {
+        return pieceAt(point + direction.toCoord())
+    }
 }
 
 
@@ -245,7 +379,7 @@ class RootViewController: UIViewController {
     override func viewDidLoad(){
         super.viewDidLoad()
         
-        let board = Board()
+        let board = Board(size: 7)
         
         let game = Game(board: board)
         

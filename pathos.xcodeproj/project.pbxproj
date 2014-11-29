@@ -9,11 +9,8 @@
 /* Begin PBXBuildFile section */
 		B22186F8197A45B700A44B4C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22186F7197A45B700A44B4C /* AppDelegate.swift */; };
 		B22186FA197A45B700A44B4C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B22186F9197A45B700A44B4C /* Images.xcassets */; };
-		B2218706197A45B700A44B4C /* GameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2218705197A45B700A44B4C /* GameTests.swift */; };
+		B2218706197A45B700A44B4C /* pathosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2218705197A45B700A44B4C /* pathosTests.swift */; };
 		B2218710197AB23500A44B4C /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B221870F197AB23500A44B4C /* RootViewController.swift */; };
-		B222E92C19D7988A009C8ACC /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = B222E92B19D7988A009C8ACC /* Game.swift */; };
-		B222E92E19D79974009C8ACC /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = B222E92D19D79974009C8ACC /* Board.swift */; };
-		B230392219DCF8AC00505455 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = B230392119DCF8AC00505455 /* Player.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,11 +30,8 @@
 		B22186F9197A45B700A44B4C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B22186FF197A45B700A44B4C /* pathosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = pathosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2218704197A45B700A44B4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B2218705197A45B700A44B4C /* GameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTests.swift; sourceTree = "<group>"; };
+		B2218705197A45B700A44B4C /* pathosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pathosTests.swift; sourceTree = "<group>"; };
 		B221870F197AB23500A44B4C /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
-		B222E92B19D7988A009C8ACC /* Game.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
-		B222E92D19D79974009C8ACC /* Board.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
-		B230392119DCF8AC00505455 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,9 +75,6 @@
 			children = (
 				B22186F7197A45B700A44B4C /* AppDelegate.swift */,
 				B221870F197AB23500A44B4C /* RootViewController.swift */,
-				B222E92B19D7988A009C8ACC /* Game.swift */,
-				B222E92D19D79974009C8ACC /* Board.swift */,
-				B230392119DCF8AC00505455 /* Player.swift */,
 				B22186F9197A45B700A44B4C /* Images.xcassets */,
 				B22186F5197A45B700A44B4C /* Supporting Files */,
 			);
@@ -101,7 +92,7 @@
 		B2218702197A45B700A44B4C /* pathosTests */ = {
 			isa = PBXGroup;
 			children = (
-				B2218705197A45B700A44B4C /* GameTests.swift */,
+				B2218705197A45B700A44B4C /* pathosTests.swift */,
 				B2218703197A45B700A44B4C /* Supporting Files */,
 			);
 			path = pathosTests;
@@ -213,9 +204,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2218710197AB23500A44B4C /* RootViewController.swift in Sources */,
-				B222E92C19D7988A009C8ACC /* Game.swift in Sources */,
-				B222E92E19D79974009C8ACC /* Board.swift in Sources */,
-				B230392219DCF8AC00505455 /* Player.swift in Sources */,
 				B22186F8197A45B700A44B4C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -224,7 +212,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2218706197A45B700A44B4C /* GameTests.swift in Sources */,
+				B2218706197A45B700A44B4C /* pathosTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,7 +381,6 @@
 				B221870B197A45B700A44B4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 		B221870C197A45B700A44B4C /* Build configuration list for PBXNativeTarget "pathosTests" */ = {
 			isa = XCConfigurationList;
@@ -402,7 +389,6 @@
 				B221870E197A45B700A44B4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
