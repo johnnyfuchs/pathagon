@@ -381,6 +381,7 @@
 				B221870B197A45B700A44B4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B221870C197A45B700A44B4C /* Build configuration list for PBXNativeTarget "pathosTests" */ = {
 			isa = XCConfigurationList;
@@ -389,6 +390,7 @@
 				B221870E197A45B700A44B4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

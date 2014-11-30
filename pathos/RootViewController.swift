@@ -6,167 +6,129 @@
 //  Copyright (c) 2014 beergrammer. All rights reserved.
 //
 
-// TODO: Come up with a "Turn" system
-
-
 import Foundation
 import UIKit
 import Darwin
 
-
-func == (lhs:Position, rhs:Position) -> Bool {
+public func == (lhs:Position, rhs:Position) -> Bool {
     return lhs.x == rhs.x && lhs.y == rhs.y
 }
 
-func + (lhs:Position, rhs:Position) -> Position {
-    return Position(lhs.x + rhs.x, lhs.y + lhs.y)
+public func !== (lhs:Position, rhs:Position) -> Bool {
+    return !(lhs == rhs)
 }
 
+public func + (lhs:Position, rhs:Position) -> Position {
+    return Position(lhs.x + rhs.x, lhs.y + rhs.y)
+}
 
-struct Position {
-    var x, y :Int
+public struct Position:Equatable {
+    public var x, y :Int
     
     func description() -> String {
-        return "x:\(x) y:\(y)"
+        return "{ x:\(x) y:\(y) }"
     }
-    init(_ x:Int,_ y:Int){
+    
+    public init(_ x:Int,_ y:Int){
         self.x = x
         self.y = y
     }
 }
 
-enum Direction {
+public enum Direction {
     case N, NE, E, SE, S, SW, W, NW
     
-    func toCoord() -> Position {
+    public func toCoord() -> Position {
         switch self {
-            case .N:  return Position(-1, 0)
-            case .NE: return Position(-1, 1)
-            case .E:  return Position(0 , 1)
+            case .N:  return Position(0, -1)
+            case .NE: return Position(1, -1)
+            case .E:  return Position(1 , 0)
             case .SE: return Position(1 , 1)
             case .S:  return Position(0 , 1)
-            case .SW: return Position(-1, 1)
-            case .W:  return Position(0 ,-1)
+            case .SW: return Position(1, -1)
+            case .W:  return Position(-1 ,0)
             case .NW: return Position(-1,-1)
         }
     }
 }
 
-enum PlayerColor {
-    case White, Black
-    
-    func description() -> String {
-        switch self {
-        case .White:
-                return "White"
-        case .Black:
-                return "Black"
-        }
-    }
-    
-    func string(type:String) -> PlayerColor {
-        switch type {
-            case "White":
-                return White
-            case "Black":
-                return Black
-            default:
-                return White
-        }
-    }
+public func == (lhs: Player, rhs: Player) -> Bool {
+    return lhs.name == rhs.name
 }
 
-
-
-func == (lhs: Player, rhs: Player) -> Bool {
-    return lhs.color == rhs.color
+public func !== (lhs: Player, rhs: Player) -> Bool {
+    return !(lhs.name == rhs.name)
 }
 
-
-
-class Player:Equatable {
+public class Player:Equatable {
     
-    let startingPieces = 14
+    public var name:String
     
-    var name:String
-    var color:PlayerColor
-    var pieces:[Piece] = []
-    
-    init(name:String, color:PlayerColor){
+    public init(name:String){
         self.name = name
-        self.color = color
-        
-        for _ in 0...startingPieces {
-            pieces.append(Piece(player: self))
-        }
-    }
-    
-    func drawPiece() -> Piece? {
-        if pieces.count > 0 {
-            let piece = pieces[0]
-            pieces.removeAtIndex(0)
-            return piece
-        }
-        return nil
     }
     
     func description() -> String {
-        return "name: \(name) side: \(color.description())"
+        return "name: \(name)"
     }
 }
 
-func == (lhs: Piece, rhs: Piece) -> Bool {
+public func == (lhs: Piece, rhs: Piece) -> Bool {
     return lhs.position! == rhs.position! && lhs.player == rhs.player;
 }
+
+public func !== (lhs:Piece, rhs:Piece) -> Bool {
+    return !(lhs == rhs)
+}
     
-class Piece {
-    var position:Position?
-    var player:Player
-    var highlight:Bool = false
+public class Piece : Printable, Equatable {
+    public var position:Position?
+    public var player:Player
+    public var highlight:Bool = false
     
-    init(player:Player){
+    public init(player:Player){
         self.player = player
     }
     
-    func description() -> String {
+    public init(_ player:Player, _ position:Position){
+        self.player = player
+        self.position = position
+    }
+    
+    public var description : String {
         return "player: {\(player.description())}, position: \(position?.description())"
     }
 }
 
-class Move {
-    var piece:Piece
+public class Move {
+    public var piece:Piece
     var to:Position
     
-    init(piece:Piece, to:Position){
+    public init(piece:Piece, to:Position){
         self.piece = piece
         self.to = to
     }
     
-    func complete(){
+    public func complete(){
         piece.position = to
     }
     
     func description() -> String {
-        return "piece: \(piece.description()),\n target: \(to.description())"
+        return "piece: \(piece),\n target: \(to.description())"
     }
 }
 
-class Path {
-    var pieces:[Piece] = []
-}
-
-
-class Game {
-    var board:Board
-    var players:[Player]
-    var turn:Player
+public class Game {
+    public var board:Board
+    public var players:[Player]
+    public var turn:Player
     
-    init(board:Board){
+    public init(board:Board){
         self.board = board
         
         players = [
-            Player(name: "Hey", color: PlayerColor.White),
-            Player(name: "You", color: PlayerColor.Black)
+            Player(name: "Hey"),
+            Player(name: "You")
         ]
         
         turn = players[0]
@@ -183,28 +145,35 @@ class Game {
         }
         
         move.complete()
-        println(move.piece.position?.description())
+        
         if !move.piece.highlight {
-            board.pieces.append(move.piece)
+            
+            board.add(move.piece)
+            
+            let trappedPieces = board.piecesTrappedBy(move.piece)
+            board.removePieces(trappedPieces)
+            
         } else {
             move.piece.highlight = false
         }
-
-        println(board.pieces.count)
-
+        
         return true
     }
-    
 }
 
-class Board {
+public class Board {
     
     var size = 8
     var pieces:[Piece] = []
+    var removedPieces:[Piece] = []
     let goals:[Direction] = [.N, .S, .E, .W]
     
-    init(size:Int){
+    public init(size:Int){
         self.size = size;
+    }
+    
+    public func add(piece:Piece) {
+        pieces.append(piece)
     }
     
     func highlightedPiece() -> Piece? {
@@ -222,12 +191,11 @@ class Board {
                 return false
             }
         }
-        
         return move.to.x >= 0 && move.to.x < size && move.to.y >= 0 && move.to.y < size
     }
     
     func pieceAt(position:Position) -> Piece? {
-        for piece:Piece in pieces {
+        for piece in pieces {
             if piece.position! == position {
                 return piece
             }
@@ -235,23 +203,38 @@ class Board {
         return nil
     }
     
-    func piecesFrom(point:Position, directions:[Direction]) -> [Piece] {
+    public func piecesTrappedBy(piece:Piece) -> [Piece] {
+        let player = piece.player
         var matches:[Piece] = []
-        for piece in pieces {
-            for direction in directions {
-                if let match = pieceFrom(point, direction: direction) {
-                    matches.append(match)
+        let dirs:[Direction] = [.N, .S, .E, .W]
+        if let pos = piece.position {
+            for d in dirs {
+                if let captureable = pieceAt(pos + d.toCoord()) {
+                    if captureable.player !== player {
+                        if let trapping = pieceAt(pos + d.toCoord() + d.toCoord()) {
+                            if trapping.player == player {
+                                matches.append(captureable)
+                            }
+                        }
+                    }
                 }
             }
         }
         return matches
     }
     
-    func pieceFrom(point:Position, direction:Direction) -> Piece? {
-        return pieceAt(point + direction.toCoord())
+    func removePieces(piecesToRemove:[Piece]) {
+        pieces = pieces.filter { (piece) -> Bool in
+            for pieceToRemove in piecesToRemove {
+                if piece === pieceToRemove {
+                    return false
+                }
+            }
+            return true
+        }
+        removedPieces = piecesToRemove
     }
 }
-
 
 class BoardView: UIView {
     var game:Game
@@ -326,7 +309,7 @@ class BoardView: UIView {
                 let frame = rectForTileAt(pos.y, pos.x)
                 let pieceView = UIView(frame: frame)
                 pieceView.layer.cornerRadius = frame.width / 2.0
-                pieceView.backgroundColor = piece.player.color == .Black ? UIColor.orangeColor() : UIColor.magentaColor()
+                pieceView.backgroundColor = piece.player == game.players[0] ? UIColor.orangeColor() : UIColor.magentaColor()
                 if piece.highlight {
                     pieceView.backgroundColor = UIColor.yellowColor()
                 }
