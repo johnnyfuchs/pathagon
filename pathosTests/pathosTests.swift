@@ -197,4 +197,33 @@ class pathosTests: XCTestCase {
         
         XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer, "resets remaining pieces")
     }
+    
+    func testWinExists() {
+        let board = Board(size: 4, a:Player(name:"one"), b:Player(name:"two"))
+        
+        let a = Piece(board.playerA, Position(0,0))
+        board.play(a)
+        println(board)
+        XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
+        let b = Piece(board.playerA, Position(3,0))
+        board.play(b)
+        println(board)
+        XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
+        let c = Piece(board.playerA, Position(3,1))
+        board.play(c)
+        println(board)
+        XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
+        let d = Piece(board.playerA, Position(3,2))
+        board.play(d)
+        println(board)
+        XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
+        let e = Piece(board.playerA, Position(2,2))
+        board.play(e)
+        println(board)
+        XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
+        let f = Piece(board.playerA, Position(2,3))
+        board.play(f)
+        println(board)
+        XCTAssertTrue(board.winExistsFor(board.playerA), "We have a winner!")
+    }
 }

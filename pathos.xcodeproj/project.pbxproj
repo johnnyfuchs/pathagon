@@ -11,6 +11,7 @@
 		B22186FA197A45B700A44B4C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B22186F9197A45B700A44B4C /* Images.xcassets */; };
 		B2218706197A45B700A44B4C /* pathosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2218705197A45B700A44B4C /* pathosTests.swift */; };
 		B2218710197AB23500A44B4C /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B221870F197AB23500A44B4C /* RootViewController.swift */; };
+		B2A180F61A2C4380009AFFD9 /* PriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A180F51A2C4380009AFFD9 /* PriorityQueue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +33,7 @@
 		B2218704197A45B700A44B4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2218705197A45B700A44B4C /* pathosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pathosTests.swift; sourceTree = "<group>"; };
 		B221870F197AB23500A44B4C /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		B2A180F51A2C4380009AFFD9 /* PriorityQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PriorityQueue.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 			children = (
 				B22186F7197A45B700A44B4C /* AppDelegate.swift */,
 				B221870F197AB23500A44B4C /* RootViewController.swift */,
+				B2A180F51A2C4380009AFFD9 /* PriorityQueue.swift */,
 				B22186F9197A45B700A44B4C /* Images.xcassets */,
 				B22186F5197A45B700A44B4C /* Supporting Files */,
 			);
@@ -205,6 +208,7 @@
 			files = (
 				B2218710197AB23500A44B4C /* RootViewController.swift in Sources */,
 				B22186F8197A45B700A44B4C /* AppDelegate.swift in Sources */,
+				B2A180F61A2C4380009AFFD9 /* PriorityQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

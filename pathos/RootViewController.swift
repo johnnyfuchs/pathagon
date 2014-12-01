@@ -22,8 +22,12 @@ public func + (lhs:Position, rhs:Position) -> Position {
     return Position(lhs.x + rhs.x, lhs.y + rhs.y)
 }
 
-public struct Position:Equatable {
+public struct Position:Equatable, Hashable {
     public var x, y :Int
+    
+    public var hashValue:Int {
+        return x.hashValue ^ y.hashValue
+    }
     
     func description() -> String {
         return "{ x:\(x) y:\(y) }"
@@ -60,7 +64,11 @@ public func !== (lhs: Player, rhs: Player) -> Bool {
     return !(lhs.name == rhs.name)
 }
 
-public class Player:Equatable {
+public class Player:Equatable, Hashable {
+    
+    public var hashValue: Int {
+        return name.hashValue
+    }
     
     public var name:String
     
@@ -81,10 +89,13 @@ public func !== (lhs:Piece, rhs:Piece) -> Bool {
     return !(lhs == rhs)
 }
     
-public class Piece : Printable, Equatable {
+public class Piece : Printable, Equatable, Hashable {
     public var position:Position?
     public var player:Player
     public var highlighted:Bool = false
+    public var hashValue: Int {
+        return player.hashValue ^ position!.hashValue
+    }
     
     public init(player:Player){
         self.player = player
@@ -100,7 +111,7 @@ public class Piece : Printable, Equatable {
     }
 }
 
-public class Board {
+public class Board: Printable {
     
     var size = 8
     public let piecesPerPlayer = 14
@@ -110,6 +121,22 @@ public class Board {
     public let playerA:Player
     public let playerB:Player
     var lastPiece:Piece?
+    public var description:String {
+        var o = "---------------\n"
+        for row in 0...size-1 {
+            o += "|"
+            for col in 0...size-1 {
+                if let piece = pieceAt(Position(col, row)) {
+                    o += piece.player == playerA ? "A" : "B"
+                } else {
+                    o += " "
+                }
+            }
+            o += "|\n"
+        }
+        o += "---------------"
+        return o
+    }
     
     public init(size:Int, a:Player, b:Player){
         self.size = size
@@ -243,7 +270,117 @@ public class Board {
         }
         return piecesPerPlayer - playedPieces
     }
+    
+    public func winExistsFor(player:Player) -> Bool {
+        
+        var startNodes:[Piece] = player == playerA ? piecesInRow(0) : piecesInCol(0)
+        var endNodes:[Piece] = player == playerA ? piecesInRow(size - 1) : piecesInCol(size - 1)
+        
+        if !(startNodes.count > 0 && endNodes.count > 0) {
+            println("no nodes to work with")
+            return false
+        } else {
+            for start in startNodes {
+                for end in endNodes {
+                    if pathExists(self, start, end) {
+                        return true
+                    }
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    func piecesInRow(row:Int) -> [Piece] {
+        var rowPieces:[Piece] = []
+        for piece in pieces {
+            if piece.position!.y == row {
+                rowPieces.append(piece)
+            }
+        }
+        return rowPieces
+    }
+    
+    func piecesInCol(col:Int) -> [Piece] {
+        var colPieces:[Piece] = []
+        for piece in pieces {
+            if piece.position!.x == col {
+                colPieces.append(piece)
+            }
+        }
+        return colPieces
+    }
 }
+
+
+func pathExists(board:Board, start:Piece, end:Piece) -> Bool {
+    
+    func heuristic(a:Position, b:Position) -> Int {
+        return abs(a.x - b.x) + abs(a.y - b.y)
+    }
+    
+    func neigbors(board:Board, position:Position) -> [Piece] {
+        var pieces:[Piece] = []
+        let dirs:[Direction] = [.N, .E, .S, .W]
+        for dir in dirs {
+            if let piece = board.pieceAt(position + dir.toCoord()){
+                pieces.append(piece)
+            }
+        }
+        return pieces
+    }
+    
+    var frontier = PriorityQueue<Int, Piece>()
+    frontier.push(0, item: start)
+    var path = Dictionary<Piece, Piece>()
+    var costs = Dictionary<Piece, Int>()
+    
+    while !frontier.empty() {
+        let current = frontier.pop()!.1
+        
+        if current == end {
+            return true
+        }
+        
+        let neighbors = neigbors(board, current.position!)
+        for neighbor in neighbors {
+            let newCost = costs[current] ?? 0 + heuristic(neighbor.position!, end.position!)
+            
+            if costs[neighbor] == nil || newCost < (costs[neighbor] ?? 0) {
+                costs[neighbor] = newCost
+                let priority = newCost + heuristic(neighbor.position!, end.position!)
+                frontier.push(priority, item: neighbor)
+                path[neighbor] = current
+            }
+        }
+    }
+    
+    return false
+}
+
+//frontier = PriorityQueue()
+//frontier.put(start, 0)
+//came_from = {}
+//cost_so_far = {}
+//came_from[start] = None
+//cost_so_far[start] = 0
+//
+//while not frontier.empty():
+//  current = frontier.get()
+//
+//  if current == goal:
+//    break
+//
+//  for next in graph.neighbors(current):
+//    new_cost = cost_so_far[current] + graph.cost(current, next)
+//    if next not in cost_so_far or new_cost < cost_so_far[next]:
+//      cost_so_far[next] = new_cost
+//      priority = new_cost + heuristic(goal, next)
+//      frontier.put(next, priority)
+//      came_from[next] = current
+
+
 
 class BoardView: UIView {
     var board:Board
@@ -352,7 +489,7 @@ class RootViewController: UIViewController {
     
     override func viewDidLoad(){
         super.viewDidLoad()
-        let board = Board(size: 7, a: Player(name: "one"), b: Player(name: "Other"))
+        let board = Board(size: 4, a: Player(name: "one"), b: Player(name: "Other"))
         var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), board: board)
         view.addSubview(boardView)
         boardView.render()
