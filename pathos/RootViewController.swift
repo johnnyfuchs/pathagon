@@ -22,15 +22,14 @@ public func + (lhs:Position, rhs:Position) -> Position {
     return Position(lhs.x + rhs.x, lhs.y + rhs.y)
 }
 
-public struct Position:Equatable, Hashable {
+public struct Position:Equatable, Hashable, Printable {
     public var x, y :Int
+    public var description:String {
+        return "{ x:\(x) y:\(y) }"
+    }
     
     public var hashValue:Int {
         return x.hashValue ^ y.hashValue
-    }
-    
-    func description() -> String {
-        return "{ x:\(x) y:\(y) }"
     }
     
     public init(_ x:Int,_ y:Int){
@@ -64,7 +63,11 @@ public func !== (lhs: Player, rhs: Player) -> Bool {
     return !(lhs.name == rhs.name)
 }
 
-public class Player:Equatable, Hashable {
+public class Player:Equatable, Hashable, Printable {
+    
+    public var description:String {
+        return "player_" + name
+    }
     
     public var hashValue: Int {
         return name.hashValue
@@ -74,10 +77,6 @@ public class Player:Equatable, Hashable {
     
     public init(name:String){
         self.name = name
-    }
-    
-    func description() -> String {
-        return "name: \(name)"
     }
 }
 
@@ -107,7 +106,7 @@ public class Piece : Printable, Equatable, Hashable {
     }
     
     public var description : String {
-        return "player: {\(player.description())}, position: \(position?.description())"
+        return "player: {\(player)}, position: \(position?)"
     }
 }
 
@@ -121,6 +120,7 @@ public class Board: Printable {
     public let playerA:Player
     public let playerB:Player
     var lastPiece:Piece?
+    var onWinner:(player:Player) -> () = { (player) in }
     public var description:String {
         var o = "---------------\n"
         for row in 0...size-1 {
@@ -219,6 +219,9 @@ public class Board: Printable {
         let trappedPieces = piecesTrappedBy(piece)
         removePieces(trappedPieces)
         removedPieces = trappedPieces
+        if winExistsFor(piece.player) {
+            self.onWinner(player: piece.player)
+        }
     }
     
     public func pieceAt(position:Position) -> Piece? {
@@ -273,8 +276,8 @@ public class Board: Printable {
     
     public func winExistsFor(player:Player) -> Bool {
         
-        var startNodes:[Piece] = player == playerA ? piecesInRow(0) : piecesInCol(0)
-        var endNodes:[Piece] = player == playerA ? piecesInRow(size - 1) : piecesInCol(size - 1)
+        var startNodes:[Piece] = player == playerA ? piecesInRow(0, player: player) : piecesInCol(0, player: player)
+        var endNodes:[Piece] = player == playerA ? piecesInRow(size - 1, player: player) : piecesInCol(size - 1, player: player)
         
         if !(startNodes.count > 0 && endNodes.count > 0) {
             println("no nodes to work with")
@@ -292,20 +295,20 @@ public class Board: Printable {
         return false
     }
     
-    func piecesInRow(row:Int) -> [Piece] {
+    func piecesInRow(row:Int, player:Player) -> [Piece] {
         var rowPieces:[Piece] = []
         for piece in pieces {
-            if piece.position!.y == row {
+            if piece.position!.y == row && player == piece.player {
                 rowPieces.append(piece)
             }
         }
         return rowPieces
     }
     
-    func piecesInCol(col:Int) -> [Piece] {
+    func piecesInCol(col:Int, player:Player) -> [Piece] {
         var colPieces:[Piece] = []
         for piece in pieces {
-            if piece.position!.x == col {
+            if piece.position!.x == col  && player == piece.player {
                 colPieces.append(piece)
             }
         }
@@ -325,7 +328,9 @@ func pathExists(board:Board, start:Piece, end:Piece) -> Bool {
         let dirs:[Direction] = [.N, .E, .S, .W]
         for dir in dirs {
             if let piece = board.pieceAt(position + dir.toCoord()){
-                pieces.append(piece)
+                if piece.player == start.player {
+                    pieces.append(piece)
+                }
             }
         }
         return pieces
@@ -489,7 +494,11 @@ class RootViewController: UIViewController {
     
     override func viewDidLoad(){
         super.viewDidLoad()
-        let board = Board(size: 4, a: Player(name: "one"), b: Player(name: "Other"))
+        let board = Board(size: 7, a: Player(name: "one"), b: Player(name: "Other"))
+        board.onWinner = { (player:Player) in
+            let title = "\(player) won"
+            UIAlertView(title: "Winner!", message:title, delegate: nil, cancelButtonTitle: "Cancel").show()
+        }
         var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), board: board)
         view.addSubview(boardView)
         boardView.render()
