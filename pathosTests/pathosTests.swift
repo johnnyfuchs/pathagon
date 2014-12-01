@@ -50,7 +50,7 @@ class pathosTests: XCTestCase {
     func testSurroundingPieces() {
         let playerOne = Player(name:"one")
         let playerTwo = Player(name:"two")
-        let board = Board(size: 8)
+        let board = Board(size: 8, a:playerOne, b:playerTwo)
         let a = Piece(playerOne, Position(1,2))
         let b = Piece(playerOne, Position(2,1))
         let c = Piece(playerOne, Position(2,3))
@@ -63,17 +63,17 @@ class pathosTests: XCTestCase {
         
         let x = Piece(playerTwo, Position(2,2))
         
-        board.add(a)
-        board.add(e)
+        board.play(a)
+        board.play(e)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 1, "One matching position")
-        board.add(b)
-        board.add(f)
+        board.play(b)
+        board.play(f)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 2, "Two matching positions")
-        board.add(c)
-        board.add(h)
+        board.play(c)
+        board.play(h)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 3, "Three matching positions")
-        board.add(d)
-        board.add(g)
+        board.play(d)
+        board.play(g)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 4, "Four matching positions")
         let pieces = board.piecesTrappedBy(x)
         XCTAssert(pieces[0].player == playerOne, "0 is player 2")
@@ -81,12 +81,120 @@ class pathosTests: XCTestCase {
         XCTAssert(pieces[2].player == playerOne, "2 is player 2")
         XCTAssert(pieces[3].player == playerOne, "3 is player 2")
     }
+    
     func testRemoveJumps() {
-        // Assert which pieces are removed
+
+        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        let a = Piece(board.playerA, Position(1,2))
+        let b = Piece(board.playerA, Position(2,1))
+        let c = Piece(board.playerA, Position(2,3))
+        let d = Piece(board.playerA, Position(3,2))
         
+        let e = Piece(board.playerB, Position(0,2))
+        let f = Piece(board.playerB, Position(2,0))
+        let g = Piece(board.playerB, Position(4,2))
+        let h = Piece(board.playerB, Position(2,4))
+        
+        let x = Piece(board.playerB, Position(2,2))
+        
+        board.play(a)
+        board.play(e)
+        XCTAssertEqual(board.piecesTrappedBy(x).count, 1, "One matching position")
+        board.play(b)
+        board.play(f)
+        XCTAssertEqual(board.piecesTrappedBy(x).count, 2, "Two matching positions")
+        board.play(c)
+        board.play(h)
+        XCTAssertEqual(board.piecesTrappedBy(x).count, 3, "Three matching positions")
+        board.play(d)
+        board.play(g)
+        XCTAssertEqual(board.piecesTrappedBy(x).count, 4, "Four matching positions")
+        let pieces = board.piecesTrappedBy(x)
+        XCTAssert(pieces[0].player == board.playerA, "0 is player 2")
+        XCTAssert(pieces[1].player == board.playerA, "1 is player 2")
+        XCTAssert(pieces[2].player == board.playerA, "2 is player 2")
+        XCTAssert(pieces[3].player == board.playerA, "3 is player 2")
     }
+    
     func testPiecesCannotBePlaced() {
         // Assert which pieces are removed
+        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
         
+        let pa = Position(1,2)
+        let pb = Position(2,1)
+        
+        let a = Piece(board.playerA, pa)
+        let b = Piece(board.playerA, pb)
+        
+        board.play(a)
+
+        XCTAssertFalse( board.canPlay(a), "Can't add a piece over another piece")
+        XCTAssertTrue( board.canPlay(b), "Can add a piece over fresh square")
+    }
+    
+    func testTrappedPiecesAreRemoved() {
+        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        
+        let a = Piece(board.playerA, Position(1,2))
+        let b = Piece(board.playerA, Position(2,1))
+        let c = Piece(board.playerA, Position(2,3))
+        let d = Piece(board.playerA, Position(3,2))
+        
+        let e = Piece(board.playerB, Position(0,2))
+        let f = Piece(board.playerB, Position(2,0))
+        let g = Piece(board.playerB, Position(4,2))
+        let h = Piece(board.playerB, Position(2,4))
+        
+        let x = Piece(board.playerB, Position(2,2))
+        
+        board.play(a)
+        board.play(b)
+        board.play(c)
+        board.play(d)
+        board.play(e)
+        board.play(f)
+        board.play(g)
+        board.play(h)
+        
+        XCTAssertFalse( board.canPlay(a), "Can't add a piece in a previously filled position")
+        XCTAssertFalse( board.canPlay(b), "Can't add a piece in a previously filled position")
+    }
+    
+    func testPiecesLeft() {
+
+        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        
+        let a = Piece(board.playerA, Position(1,2))
+        let b = Piece(board.playerA, Position(2,1))
+        let c = Piece(board.playerA, Position(2,3))
+        let d = Piece(board.playerA, Position(3,2))
+        
+        let e = Piece(board.playerB, Position(0,2))
+        let f = Piece(board.playerB, Position(2,0))
+        let g = Piece(board.playerB, Position(4,2))
+        let h = Piece(board.playerB, Position(2,4))
+        
+        let x = Piece(board.playerB, Position(2,2))
+        
+        board.play(a)
+        XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer - 1, "remaining pieces")
+        board.play(b)
+        XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer - 2, "remaining pieces")
+        board.play(c)
+        XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer - 3, "remaining pieces")
+        board.play(d)
+        XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer - 4, "remaining pieces")
+        
+        board.play(e)
+         XCTAssertEqual( board.piecesLeftForPlayer(board.playerB), board.piecesPerPlayer - 1, "remaining pieces")
+        board.play(f)
+         XCTAssertEqual( board.piecesLeftForPlayer(board.playerB), board.piecesPerPlayer - 2, "remaining pieces")
+        board.play(g)
+         XCTAssertEqual( board.piecesLeftForPlayer(board.playerB), board.piecesPerPlayer - 3, "remaining pieces")
+        board.play(h)
+         XCTAssertEqual( board.piecesLeftForPlayer(board.playerB), board.piecesPerPlayer - 4, "remaining pieces")
+        board.play(x)
+        
+        XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer, "resets remaining pieces")
     }
 }

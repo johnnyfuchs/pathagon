@@ -84,7 +84,7 @@ public func !== (lhs:Piece, rhs:Piece) -> Bool {
 public class Piece : Printable, Equatable {
     public var position:Position?
     public var player:Player
-    public var highlight:Bool = false
+    public var highlighted:Bool = false
     
     public init(player:Player){
         self.player = player
@@ -100,101 +100,101 @@ public class Piece : Printable, Equatable {
     }
 }
 
-public class Move {
-    public var piece:Piece
-    var to:Position
-    
-    public init(piece:Piece, to:Position){
-        self.piece = piece
-        self.to = to
-    }
-    
-    public func complete(){
-        piece.position = to
-    }
-    
-    func description() -> String {
-        return "piece: \(piece),\n target: \(to.description())"
-    }
-}
-
-public class Game {
-    public var board:Board
-    public var players:[Player]
-    public var turn:Player
-    
-    public init(board:Board){
-        self.board = board
-        
-        players = [
-            Player(name: "Hey"),
-            Player(name: "You")
-        ]
-        
-        turn = players[0]
-    }
-    
-    func nextPlayer() -> Player {
-        return turn == players[0] ? players[1] : players[0]
-    }
-    
-    func playMove(move:Move) -> Bool {
-        
-        if !board.isValidMove(move) {
-            return false
-        }
-        
-        move.complete()
-        
-        if !move.piece.highlight {
-            
-            board.add(move.piece)
-            
-            let trappedPieces = board.piecesTrappedBy(move.piece)
-            board.removePieces(trappedPieces)
-            
-        } else {
-            move.piece.highlight = false
-        }
-        
-        return true
-    }
-}
-
 public class Board {
     
     var size = 8
+    public let piecesPerPlayer = 14
     var pieces:[Piece] = []
     var removedPieces:[Piece] = []
     let goals:[Direction] = [.N, .S, .E, .W]
+    public let playerA:Player
+    public let playerB:Player
+    var lastPiece:Piece?
     
-    public init(size:Int){
-        self.size = size;
+    public init(size:Int, a:Player, b:Player){
+        self.size = size
+        playerA = a
+        playerB = b
     }
     
-    public func add(piece:Piece) {
-        pieces.append(piece)
+    public func currentPlayer() -> Player {
+        if let lastPlayer = lastPiece?.player {
+            if lastPlayer == playerA {
+                return playerB
+            }
+        }
+        return playerA
+    }
+    
+    public func move(from:Position, to:Position) -> Bool {
+        if let piece = pieceAt(from) {
+            if canPlay(Piece(piece.player, to)) {
+                piece.position = to
+                completeMove(piece)
+                return true
+            }
+        }
+        return false
+    }
+    
+    public func play(piece:Piece) -> Bool {
+        if canPlay(piece) {
+            pieces.append(piece)
+            completeMove(piece)
+            return true
+        }
+        return true
+    }
+    
+    public func canPlay(targetPiece:Piece) -> Bool {
+        for piece in pieces {
+            if piece.position == targetPiece.position? {
+                return false
+            }
+        }
+        for piece in removedPieces {
+            if piece.position == targetPiece.position? {
+                return false
+            }
+        }
+        
+        let pos = targetPiece.position!
+        
+        return pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size
+    }
+    
+    func highlight(piece pieceToHighlight:Piece, highlight:Bool){
+        for piece in pieces {
+            piece.highlighted = false
+        }
+        if !highlight {
+            return
+        }
+        if let pos = pieceToHighlight.position {
+            if let targetPiece = pieceAt(pos) {
+                targetPiece.highlighted = true
+            }
+        }
     }
     
     func highlightedPiece() -> Piece? {
         for piece in pieces {
-            if piece.highlight {
+            if piece.highlighted {
                 return piece
             }
         }
         return nil
     }
     
-    func isValidMove(move:Move) -> Bool {
-        for piece in pieces {
-            if move.to.x == piece.position?.x && move.to.y == piece.position?.y {
-                return false
-            }
-        }
-        return move.to.x >= 0 && move.to.x < size && move.to.y >= 0 && move.to.y < size
+    func completeMove(piece:Piece) {
+        piece.highlighted = false
+        lastPiece = piece
+        let trappedPieces = piecesTrappedBy(piece)
+        removePieces(trappedPieces)
+        removedPieces = trappedPieces
     }
     
-    func pieceAt(position:Position) -> Piece? {
+    public func pieceAt(position:Position) -> Piece? {
         for piece in pieces {
             if piece.position! == position {
                 return piece
@@ -223,7 +223,7 @@ public class Board {
         return matches
     }
     
-    func removePieces(piecesToRemove:[Piece]) {
+    public func removePieces(piecesToRemove:[Piece]) {
         pieces = pieces.filter { (piece) -> Bool in
             for pieceToRemove in piecesToRemove {
                 if piece === pieceToRemove {
@@ -232,41 +232,39 @@ public class Board {
             }
             return true
         }
-        removedPieces = piecesToRemove
+    }
+    
+    public func piecesLeftForPlayer(player:Player) -> Int {
+        var playedPieces = 0
+        for piece in pieces {
+            if piece.player == player {
+                playedPieces++
+            }
+        }
+        return piecesPerPlayer - playedPieces
     }
 }
 
 class BoardView: UIView {
-    var game:Game
-    
+    var board:Board
     var onTileTapped:(pos:Position) -> ()
-    
-    // local vars
     var tileViews:[[UIView]] = []
     var tapRecognizer:UITapGestureRecognizer?
 
-    init(frame: CGRect, game:Game){
-        self.game = game
-        
-        for row in 0...game.board.size {
-            
+    init(frame: CGRect, board:Board){
+        self.board = board
+        for row in 0...board.size {
             var tileRowViews:[UIView] = []
-            
-            for col in 0...game.board.size {
+            for col in 0...board.size {
                 var tileView = UIView(frame: CGRectZero)
                 tileRowViews.append(tileView)
             }
-
             tileViews.append(tileRowViews)
         }
-        
         self.onTileTapped = {(pos:Position) in }
-        
         super.init(frame: frame)
-        
         userInteractionEnabled = true
         clipsToBounds = true
-        
         tapRecognizer = UITapGestureRecognizer(target: self, action: "handleTap:")
         addGestureRecognizer(tapRecognizer!)
     }
@@ -279,26 +277,23 @@ class BoardView: UIView {
         super.layoutSubviews()
     }
     
-    
     func handleTap(sender: UITapGestureRecognizer){
         let point = sender.locationInView(self)
-        let col = Int(floor((point.x / frame.width) * CGFloat(game.board.size)))
-        let row = Int(floor((point.y / frame.height) * CGFloat(game.board.size)))
+        let col = Int(floor((point.x / frame.width) * CGFloat(board.size)))
+        let row = Int(floor((point.y / frame.height) * CGFloat(board.size)))
         self.onTileTapped(pos:Position(col, row))
     }
     
     func render() {
-
         for subview in subviews {
             subview.removeFromSuperview()
         }
-        
         drawBoard()
         drawPieces()
     }
     
     func drawPieces(){
-        for p in game.board.pieces {
+        for p in board.pieces {
             draw(p)
         }
     }
@@ -309,8 +304,8 @@ class BoardView: UIView {
                 let frame = rectForTileAt(pos.y, pos.x)
                 let pieceView = UIView(frame: frame)
                 pieceView.layer.cornerRadius = frame.width / 2.0
-                pieceView.backgroundColor = piece.player == game.players[0] ? UIColor.orangeColor() : UIColor.magentaColor()
-                if piece.highlight {
+                pieceView.backgroundColor = piece.player == board.playerA ? UIColor.orangeColor() : UIColor.magentaColor()
+                if piece.highlighted {
                     pieceView.backgroundColor = UIColor.yellowColor()
                 }
                 self.addSubview(pieceView)
@@ -324,27 +319,23 @@ class BoardView: UIView {
     }
     
     func tileSize() -> CGSize {
-        let w = frame.size.width / CGFloat(game.board.size)
-        let h = frame.size.height / CGFloat(game.board.size)
-        
+        let w = frame.size.width / CGFloat(board.size)
+        let h = frame.size.height / CGFloat(board.size)
         return CGSize(width: w, height: h)
     }
     
     func drawBoard(){
-        var columns = game.board.size
-        var rows = game.board.size
-        
+        var columns = board.size
+        var rows = board.size
         let size = tileSize()
         let w = size.width
         let h = size.height
-        
         for row:Int in 0...rows {
             for col:Int in 0...columns {
                 tileViews[row][col].frame = rectForTileAt(row, col)
                 tileViews[row][col].backgroundColor = colorAt(row, col)
             }
         }
-        
         for tileRowViews in tileViews {
             for tileView in tileRowViews {
                 self.addSubview(tileView)
@@ -361,45 +352,35 @@ class RootViewController: UIViewController {
     
     override func viewDidLoad(){
         super.viewDidLoad()
-        
-        let board = Board(size: 7)
-        
-        let game = Game(board: board)
-        
-        var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), game: game)
+        let board = Board(size: 7, a: Player(name: "one"), b: Player(name: "Other"))
+        var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), board: board)
         view.addSubview(boardView)
-        
         boardView.render()
         boardView.onTileTapped = { (pos:Position) in
-
-            if let piece = game.board.pieceAt(pos) {
-                if let highlightedPiece = board.highlightedPiece() {
-                    if piece == highlightedPiece {
-                         piece.highlight = false
-                    }
+            let player = board.currentPlayer()
+            
+            // user selects their own piece == highlight it or unhighlight it
+            if let piece = board.pieceAt(pos) {
+                if piece.player == player {
+                    board.highlight(piece: piece, highlight: !piece.highlighted)
                 }
-                else {
-                    piece.highlight = piece.player == game.turn
-                }
+                boardView.render()
+                return
             }
             
-            else {
-                
-                var move = Move(piece: Piece(player: game.turn), to: pos)
-                
-                if let highlightedPiece = board.highlightedPiece() {
-                    move = Move(piece: highlightedPiece, to: pos)
-                }
-                
-                if game.playMove(move) {
-                    game.turn = game.nextPlayer()
-                }
-                
-                println(move.description())
+            // if a piece is highlighted, move a piece
+            if let piece = board.highlightedPiece() {
+                board.move(piece.position!, to: pos)
+                boardView.render()
+                return
             }
-
             
-            boardView.render()
+            // if the player has pieces left, play it
+            if board.piecesLeftForPlayer(player) > 0 {
+                board.play(Piece(player, pos))
+                boardView.render()
+                return
+            }
         }
     }
 }
