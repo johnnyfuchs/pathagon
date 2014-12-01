@@ -280,7 +280,6 @@ public class Board: Printable {
         var endNodes:[Piece] = player == playerA ? piecesInRow(size - 1, player: player) : piecesInCol(size - 1, player: player)
         
         if !(startNodes.count > 0 && endNodes.count > 0) {
-            println("no nodes to work with")
             return false
         } else {
             for start in startNodes {
