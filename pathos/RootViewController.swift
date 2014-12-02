@@ -23,7 +23,7 @@ public func + (lhs:Position, rhs:Position) -> Position {
 }
 
 public struct Position:Equatable, Hashable, Printable {
-    public var x, y :Int
+    public let x, y :Int
     public var description:String {
         return "{ x:\(x) y:\(y) }"
     }
@@ -82,7 +82,7 @@ public enum Player: Printable, Hashable, Equatable {
 //}
 
 public func == (lhs: Piece, rhs: Piece) -> Bool {
-    return lhs.position! == rhs.position! && lhs.player == rhs.player;
+    return lhs.position == rhs.position && lhs.player == rhs.player;
 }
 
 public func !== (lhs:Piece, rhs:Piece) -> Bool {
@@ -90,58 +90,124 @@ public func !== (lhs:Piece, rhs:Piece) -> Bool {
 }
     
 public class Piece : Printable, Equatable, Hashable {
-    public var position:Position?
+    public var position:Position
     public var player:Player
     public var highlighted:Bool = false
-    public var hashValue: Int {
-        return player.hashValue ^ position!.hashValue
-    }
-    
-    public init(player:Player){
-        self.player = player
-    }
     
     public init(_ player:Player, _ position:Position){
         self.player = player
         self.position = position
     }
     
-    public var description : String {
-        return "player: {\(player)}, position: \(position?)"
+    public func highlight(highlight:Bool) {
+        self.highlighted = highlight
     }
-}
-
-struct BoardGrid {
-    var white, black:UInt64
-    func add(piece:Piece){
-        
-    }
-    func remove(piece:Piece) {
-        
-    }
-    func pieceAt(pos:Position) -> Player {
-        return .White
-    }
-}
-
-public class Board: Printable {
     
-    var size = 8
-    public let piecesPerPlayer = 14
-    var pieces:[Piece] = []
-    var removedPieces:[Piece] = []
-    let goals:[Direction] = [.N, .S, .E, .W]
-    public let playerA:Player = .White
-    public let playerB:Player = .Black
-    var lastPiece:Piece?
-    var onWinner:(player:Player) -> () = { (player) in }
+    public var hashValue: Int {
+        return player.hashValue ^ position.hashValue
+    }
+    
+    public var description : String {
+        return "\nplayer: {\(player)}, position: \(position)"
+    }
+}
+
+public class BoardGrid: Printable {
+    var white:UInt64 = 0
+    var black:UInt64 = 0
+    var highlight:UInt64 = 0
+    let maxSize:UInt64 = 8
+    let size:UInt64 = 7
+    let one:UInt64 = 1
+
+    public init(){
+    }
+    
+    public init(size:UInt64) {
+        assert(size <= maxSize, "Cannot have a board larger than 8x8")
+        self.size = size
+    }
+    
+    public func add(piece:Piece){
+        let pos = piece.position
+        let intPiece = one << (UInt64(pos.x) * size + UInt64(pos.y))
+        if (white & intPiece > 0) || (black & intPiece > 0) {
+            return
+        }
+        if piece.player == .White {
+            white += intPiece
+        } else {
+            black += intPiece
+        }
+    }
+    
+    public func remove(piece:Piece) {
+        let pos = piece.position
+        let intPiece = one << (UInt64(pos.x) * size + UInt64(pos.y))
+        if piece.player == .White && (white & intPiece > 0) {
+            white -= intPiece
+        } else if (black & intPiece > 0) {
+            black -= intPiece
+        }
+    }
+    
+    public func pieceAt(pos:Position) -> Piece? {
+        let intPiece = one << (UInt64(pos.x) * size + UInt64(pos.y))
+        if white & intPiece > 0 {
+            return Piece(.White, pos)
+        }
+        if black & intPiece > 0 {
+            return Piece(.Black, pos)
+        }
+        return nil
+    }
+    
+    public func highlight(pos:Position) {
+        if pieceAt(pos) != nil {
+            let intPiece = one << (UInt64(abs(pos.x)) * size + UInt64(abs(pos.y)))
+            highlight = intPiece
+        }
+    }
+    
+    public func unhighlight() {
+        highlight = 0
+    }
+    
+    public func highlighted() -> Position? {
+        for x in 0...size-1 {
+            for y in 0...size-1 {
+                let intPiece = one << (x * size + y)
+                if highlight & intPiece > 0 {
+                    return Position(Int(x), Int(y))
+                }
+            }
+        }
+        return nil
+    }
+    
+    public func allPieces() -> [Piece] {
+        var pieces:[Piece] = []
+        for x in 0...size-1 {
+            for y in 0...size-1 {
+                let intPiece = one << (x * size + y)
+                if black & intPiece > 0 {
+                    pieces.append(Piece(.Black, Position(Int(x), Int(y))))
+                }
+                if white & intPiece > 0 {
+                    pieces.append(Piece(.White, Position(Int(x), Int(y))))
+                }
+            }
+        }
+        return pieces
+    }
+    
     public var description:String {
         var o = "---------------\n"
-        for row in 0...size-1 {
+        for x:Int in 0...size-1 {
             o += "|"
-            for col in 0...size-1 {
-                if let piece = pieceAt(Position(col, row)) {
-                    o += piece.player == playerA ? "A" : "B"
+            for y:Int in 0...size-1 {
+                if let piece = pieceAt(Position(x, y)) {
+                    o += piece.player == .White ? "w" : "b"
                 } else {
                     o += " "
                 }
@@ -151,6 +217,21 @@ public class Board: Printable {
         o += "---------------"
         return o
     }
+
+}
+
+public class Board {
+    
+    var size = 7
+    public let piecesPerPlayer = 14
+    var pieces:[Piece] = []
+    var removedPieces:[Piece] = []
+    let goals:[Direction] = [.N, .S, .E, .W]
+    public let playerA:Player = .White
+    public let playerB:Player = .Black
+    var lastPiece:Piece?
+    
+    var onWinner:(player:Player) -> () = { (player) in }
     
     public init(size:Int) {
         self.size = size
@@ -167,9 +248,9 @@ public class Board: Printable {
     
     public func move(from:Position, to:Position) -> Bool {
         if let piece = pieceAt(from) {
-            if canPlay(Piece(piece.player, to)) {
-                piece.position = to
-                completeMove(piece)
+            let destination = Piece(piece.player, to)
+            if canPlay(destination) {
+                completeMove(destination)
                 return true
             }
         }
@@ -187,32 +268,31 @@ public class Board: Printable {
     
     public func canPlay(targetPiece:Piece) -> Bool {
         for piece in pieces {
-            if piece.position == targetPiece.position? {
+            if piece.position == targetPiece.position {
                 return false
             }
         }
         for piece in removedPieces {
-            if piece.position == targetPiece.position? {
+            if piece.position == targetPiece.position {
                 return false
             }
         }
         
-        let pos = targetPiece.position!
+        let pos = targetPiece.position
         
         return pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size
     }
     
     func highlight(piece pieceToHighlight:Piece, highlight:Bool){
         for piece in pieces {
-            piece.highlighted = false
+            piece.highlight(false)
         }
         if !highlight {
             return
         }
-        if let pos = pieceToHighlight.position {
-            if let targetPiece = pieceAt(pos) {
-                targetPiece.highlighted = true
-            }
+        let pos = pieceToHighlight.position
+        if let targetPiece = pieceAt(pos) {
+            targetPiece.highlighted = true
         }
     }
     
@@ -238,7 +318,7 @@ public class Board: Printable {
     
     public func pieceAt(position:Position) -> Piece? {
         for piece in pieces {
-            if piece.position! == position {
+            if piece.position == position {
                 return piece
             }
         }
@@ -249,14 +329,13 @@ public class Board: Printable {
         let player = piece.player
         var matches:[Piece] = []
         let dirs:[Direction] = [.N, .S, .E, .W]
-        if let pos = piece.position {
-            for d in dirs {
-                if let captureable = pieceAt(pos + d.toCoord()) {
-                    if captureable.player !== player {
-                        if let trapping = pieceAt(pos + d.toCoord() + d.toCoord()) {
-                            if trapping.player == player {
-                                matches.append(captureable)
-                            }
+        let pos = piece.position
+        for d in dirs {
+            if let captureable = pieceAt(pos + d.toCoord()) {
+                if captureable.player !== player {
+                    if let trapping = pieceAt(pos + d.toCoord() + d.toCoord()) {
+                        if trapping.player == player {
+                            matches.append(captureable)
                         }
                     }
                 }
@@ -266,9 +345,9 @@ public class Board: Printable {
     }
     
     public func removePieces(piecesToRemove:[Piece]) {
-        pieces = pieces.filter { (piece) -> Bool in
+        pieces = pieces.filter { (piece:Piece) -> Bool in
             for pieceToRemove in piecesToRemove {
-                if piece === pieceToRemove {
+                if piece == pieceToRemove {
                     return false
                 }
             }
@@ -309,7 +388,7 @@ public class Board: Printable {
     func piecesInRow(row:Int, player:Player) -> [Piece] {
         var rowPieces:[Piece] = []
         for piece in pieces {
-            if piece.position!.y == row && player == piece.player {
+            if piece.position.y == row && player == piece.player {
                 rowPieces.append(piece)
             }
         }
@@ -319,7 +398,7 @@ public class Board: Printable {
     func piecesInCol(col:Int, player:Player) -> [Piece] {
         var colPieces:[Piece] = []
         for piece in pieces {
-            if piece.position!.x == col  && player == piece.player {
+            if piece.position.x == col  && player == piece.player {
                 colPieces.append(piece)
             }
         }
@@ -359,13 +438,13 @@ func pathExists(board:Board, start:Piece, end:Piece) -> Bool {
             return true
         }
         
-        let neighbors = neigbors(board, current.position!)
+        let neighbors = neigbors(board, current.position)
         for neighbor in neighbors {
-            let newCost = costs[current] ?? 0 + heuristic(neighbor.position!, end.position!)
+            let newCost = costs[current] ?? 0 + heuristic(neighbor.position, end.position)
             
             if costs[neighbor] == nil || newCost < (costs[neighbor] ?? 0) {
                 costs[neighbor] = newCost
-                let priority = newCost + heuristic(neighbor.position!, end.position!)
+                let priority = newCost + heuristic(neighbor.position, end.position)
                 frontier.push(priority, item: neighbor)
                 path[neighbor] = current
             }
@@ -429,18 +508,15 @@ class BoardView: UIView {
     }
     
     func draw(piece:Piece){
-        if let p = piece.position {
-            if let pos = piece.position {
-                let frame = rectForTileAt(pos.y, pos.x)
-                let pieceView = UIView(frame: frame)
-                pieceView.layer.cornerRadius = frame.width / 2.0
-                pieceView.backgroundColor = piece.player == board.playerA ? UIColor.orangeColor() : UIColor.magentaColor()
-                if piece.highlighted {
-                    pieceView.backgroundColor = UIColor.yellowColor()
-                }
-                self.addSubview(pieceView)
-            }
+        let pos = piece.position
+        let frame = rectForTileAt(pos.y, pos.x)
+        let pieceView = UIView(frame: frame)
+        pieceView.layer.cornerRadius = frame.width / 2.0
+        pieceView.backgroundColor = piece.player == board.playerA ? UIColor.orangeColor() : UIColor.magentaColor()
+        if piece.highlighted {
+            pieceView.backgroundColor = UIColor.yellowColor()
         }
+        self.addSubview(pieceView)
     }
     
     func rectForTileAt(row:Int, _ col:Int) -> CGRect {
@@ -523,7 +599,7 @@ class RootViewController: UIViewController {
             
             // if a piece is highlighted, move a piece
             if let piece = board.highlightedPiece() {
-                board.move(piece.position!, to: pos)
+                board.move(piece.position, to: pos)
                 boardView.render()
                 return
             }

@@ -200,30 +200,74 @@ class pathosTests: XCTestCase {
     
     func testWinExists() {
         let board = Board(size: 4)
-        
         let a = Piece(board.playerA, Position(0,0))
         board.play(a)
-        println(board)
         XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
         let b = Piece(board.playerA, Position(3,0))
         board.play(b)
-        println(board)
         XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
         let c = Piece(board.playerA, Position(3,1))
         board.play(c)
-        println(board)
         XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
         let d = Piece(board.playerA, Position(3,2))
         board.play(d)
-        println(board)
         XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
         let e = Piece(board.playerA, Position(2,2))
         board.play(e)
-        println(board)
         XCTAssertFalse(board.winExistsFor(board.playerA), "No win")
         let f = Piece(board.playerA, Position(2,3))
         board.play(f)
-        println(board)
         XCTAssertTrue(board.winExistsFor(board.playerA), "We have a winner!")
+    }
+    
+    func testBoardGridAddPieceAt() {
+        var board = BoardGrid()
+        board.add(Piece(.White, Position(0,0)))
+        board.add(Piece(.White, Position(0,1)))
+        XCTAssertNotNil( board.pieceAt(Position(0,0)), "piece exists")
+        XCTAssertNotNil( board.pieceAt(Position(0,1)), "piece exists")
+    }
+    
+    func testBoardGridAddPieces() {
+        var board = BoardGrid()
+        board.add(Piece(.White, Position(1,0)))
+        board.add(Piece(.White, Position(0,1)))
+        board.add(Piece(.White, Position(1,6)))
+        board.add(Piece(.White, Position(4,2)))
+        board.add(Piece(.White, Position(4,5)))
+        board.add(Piece(.Black, Position(2,2)))
+        board.add(Piece(.Black, Position(1,2)))
+        board.add(Piece(.Black, Position(3,3)))
+        board.add(Piece(.Black, Position(5,6)))
+        board.add(Piece(.Black, Position(6,6)))
+        XCTAssertEqual( board.allPieces().count, 10 , "has appropriate piece count")
+    }
+    
+    func testDoesntReAddPieces() {
+        var board = BoardGrid()
+        board.add(Piece(.White, Position(4,1)))
+        board.add(Piece(.White, Position(4,1)))
+        board.add(Piece(.Black, Position(3,7)))
+        board.add(Piece(.Black, Position(3,7)))
+        XCTAssertEqual( board.allPieces().count, 2 , "has appropriate piece count")
+    }
+    func testRemovesPieces() {
+        var board = BoardGrid()
+        board.add(Piece(.White, Position(4,1)))
+        board.add(Piece(.White, Position(4,2)))
+        board.add(Piece(.Black, Position(3,1)))
+        board.add(Piece(.Black, Position(3,6)))
+        board.remove(Piece(.White, Position(4,2)))
+        board.remove(Piece(.Black, Position(3,6)))
+        XCTAssertEqual( board.allPieces().count, 2 , "has appropriate piece count")
+    }
+    
+    func testHighlightsAPiece() {
+        var board = BoardGrid()
+        board.add(Piece(.White, Position(4,1)))
+        board.highlight(Position(4,1))
+        XCTAssert(board.highlighted()! == Position(4,1), "highlights a piece")
+        board.unhighlight()
+        XCTAssert(board.highlighted() == nil, "unhighlights a piece")
     }
 }
