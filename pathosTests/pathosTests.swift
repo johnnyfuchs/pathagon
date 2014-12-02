@@ -48,9 +48,9 @@ class pathosTests: XCTestCase {
     }
     
     func testSurroundingPieces() {
-        let playerOne = Player(name:"one")
-        let playerTwo = Player(name:"two")
-        let board = Board(size: 8, a:playerOne, b:playerTwo)
+        let playerOne:Player = .White
+        let playerTwo:Player = .Black
+        let board = Board(size: 8)
         let a = Piece(playerOne, Position(1,2))
         let b = Piece(playerOne, Position(2,1))
         let c = Piece(playerOne, Position(2,3))
@@ -84,7 +84,7 @@ class pathosTests: XCTestCase {
     
     func testRemoveJumps() {
 
-        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        let board = Board(size: 8)
         let a = Piece(board.playerA, Position(1,2))
         let b = Piece(board.playerA, Position(2,1))
         let c = Piece(board.playerA, Position(2,3))
@@ -118,7 +118,7 @@ class pathosTests: XCTestCase {
     
     func testPiecesCannotBePlaced() {
         // Assert which pieces are removed
-        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        let board = Board(size: 8)
         
         let pa = Position(1,2)
         let pb = Position(2,1)
@@ -133,7 +133,7 @@ class pathosTests: XCTestCase {
     }
     
     func testTrappedPiecesAreRemoved() {
-        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        let board = Board(size: 8)
         
         let a = Piece(board.playerA, Position(1,2))
         let b = Piece(board.playerA, Position(2,1))
@@ -162,7 +162,7 @@ class pathosTests: XCTestCase {
     
     func testPiecesLeft() {
 
-        let board = Board(size: 8, a:Player(name:"one"), b:Player(name:"two"))
+        let board = Board(size: 8)
         
         let a = Piece(board.playerA, Position(1,2))
         let b = Piece(board.playerA, Position(2,1))
@@ -199,7 +199,7 @@ class pathosTests: XCTestCase {
     }
     
     func testWinExists() {
-        let board = Board(size: 4, a:Player(name:"one"), b:Player(name:"two"))
+        let board = Board(size: 4)
         
         let a = Piece(board.playerA, Position(0,0))
         board.play(a)

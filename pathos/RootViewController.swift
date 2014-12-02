@@ -39,7 +39,7 @@ public struct Position:Equatable, Hashable, Printable {
 }
 
 public enum Direction {
-    case N, NE, E, SE, S, SW, W, NW
+     case N, NE, E, SE, S, SW, W, NW
     
     public func toCoord() -> Position {
         switch self {
@@ -55,30 +55,31 @@ public enum Direction {
     }
 }
 
-public func == (lhs: Player, rhs: Player) -> Bool {
-    return lhs.name == rhs.name
-}
-
 public func !== (lhs: Player, rhs: Player) -> Bool {
-    return !(lhs.name == rhs.name)
+    return !(lhs == rhs)
 }
 
-public class Player:Equatable, Hashable, Printable {
-    
+public enum Player: Printable, Hashable, Equatable {
+    case White, Black
     public var description:String {
-        return "player_" + name
-    }
-    
-    public var hashValue: Int {
-        return name.hashValue
-    }
-    
-    public var name:String
-    
-    public init(name:String){
-        self.name = name
+        return (self == .White ? "White" : "Black")
     }
 }
+
+//public class Player:Equatable, Hashable, Printable {
+//    
+//
+//    
+//    public var hashValue: Int {
+//        return name.hashValue
+//    }
+//    
+//    public var name:String
+//    
+//    public init(name:String){
+//        self.name = name
+//    }
+//}
 
 public func == (lhs: Piece, rhs: Piece) -> Bool {
     return lhs.position! == rhs.position! && lhs.player == rhs.player;
@@ -110,6 +111,19 @@ public class Piece : Printable, Equatable, Hashable {
     }
 }
 
+struct BoardGrid {
+    var white, black:UInt64
+    func add(piece:Piece){
+        
+    }
+    func remove(piece:Piece) {
+        
+    }
+    func pieceAt(pos:Position) -> Player {
+        return .White
+    }
+}
+
 public class Board: Printable {
     
     var size = 8
@@ -117,8 +131,8 @@ public class Board: Printable {
     var pieces:[Piece] = []
     var removedPieces:[Piece] = []
     let goals:[Direction] = [.N, .S, .E, .W]
-    public let playerA:Player
-    public let playerB:Player
+    public let playerA:Player = .White
+    public let playerB:Player = .Black
     var lastPiece:Piece?
     var onWinner:(player:Player) -> () = { (player) in }
     public var description:String {
@@ -138,10 +152,8 @@ public class Board: Printable {
         return o
     }
     
-    public init(size:Int, a:Player, b:Player){
+    public init(size:Int) {
         self.size = size
-        playerA = a
-        playerB = b
     }
     
     public func currentPlayer() -> Player {
@@ -466,11 +478,30 @@ class BoardView: UIView {
     }
 }
 
+
+class AIPlayer {
+    
+    var board:Board
+    
+    init( board:Board) {
+        self.board = board
+    }
+    
+    func play(board:Board) -> Piece {
+        return random()
+    }
+    
+    func random() -> Piece {
+        let pos = Position(board.size - 2, board.size - 1)
+        return Piece(board.playerB, pos)
+    }
+}
+
 class RootViewController: UIViewController {
     
     override func viewDidLoad(){
         super.viewDidLoad()
-        let board = Board(size: 7, a: Player(name: "one"), b: Player(name: "Other"))
+        let board = Board(size: 7)
         board.onWinner = { (player:Player) in
             let title = "\(player) won"
             UIAlertView(title: "Winner!", message:title, delegate: nil, cancelButtonTitle: "Cancel").show()
