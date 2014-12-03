@@ -74,18 +74,13 @@ public func !== (lhs:Piece, rhs:Piece) -> Bool {
     return !(lhs == rhs)
 }
     
-public class Piece : Printable, Equatable, Hashable {
+public struct Piece : Printable, Equatable, Hashable {
     public var position:Position
     public var player:Player
-    public var highlighted:Bool = false
     
     public init(_ player:Player, _ position:Position){
         self.player = player
         self.position = position
-    }
-    
-    public func highlight(highlight:Bool) {
-        self.highlighted = highlight
     }
     
     public var hashValue: Int {
@@ -191,9 +186,9 @@ public class BoardGrid: Printable {
     
     public var description:String {
         var o = "---------------\n"
-        for x:Int in 0...size-1 {
+        for y:Int in 0...size-1 {
             o += "|"
-            for y:Int in 0...size-1 {
+            for x:Int in 0...size-1 {
                 if let piece = pieceAt(Position(x, y)) {
                     o += piece.player == .White ? "w" : "b"
                 } else {
@@ -213,8 +208,6 @@ public class Board:Printable {
     public let piecesPerPlayer = 14
     var removedPieces:[Piece] = []
     let goals:[Direction] = [.N, .S, .E, .W]
-    public let playerA:Player = .White
-    public let playerB:Player = .Black
     var lastPiece:Piece?
     var grid:BoardGrid
     
@@ -227,11 +220,11 @@ public class Board:Printable {
     
     public func currentPlayer() -> Player {
         if let lastPlayer = lastPiece?.player {
-            if lastPlayer == playerA {
-                return playerB
+            if lastPlayer == .White {
+                return .Black
             }
         }
-        return playerA
+        return .White
     }
     
     public func move(from:Position, to:Position) -> Bool {
@@ -336,8 +329,8 @@ public class Board:Printable {
     
     public func winExistsFor(player:Player) -> Bool {
         
-        var startNodes:[Piece] = player == playerA ? piecesInRow(0, player: player) : piecesInCol(0, player: player)
-        var endNodes:[Piece] = player == playerA ? piecesInRow(size - 1, player: player) : piecesInCol(size - 1, player: player)
+        var startNodes:[Piece] = player == .White ? piecesInRow(0, player: player) : piecesInCol(0, player: player)
+        var endNodes:[Piece] = player == .White ? piecesInRow(size - 1, player: player) : piecesInCol(size - 1, player: player)
         
         if !(startNodes.count > 0 && endNodes.count > 0) {
             return false
@@ -488,9 +481,11 @@ class BoardView: UIView {
         let frame = rectForTileAt(pos.y, pos.x)
         let pieceView = UIView(frame: frame)
         pieceView.layer.cornerRadius = frame.width / 2.0
-        pieceView.backgroundColor = piece.player == board.playerA ? UIColor.orangeColor() : UIColor.magentaColor()
-        if piece.highlighted {
-            pieceView.backgroundColor = UIColor.yellowColor()
+        pieceView.backgroundColor = piece.player == .White ? UIColor.whiteColor() : UIColor.blackColor()
+        if let highlightedPiece = board.highlightedPiece() {
+            if highlightedPiece == piece {
+                pieceView.backgroundColor = UIColor.yellowColor()
+            }
         }
         self.addSubview(pieceView)
     }
@@ -545,7 +540,7 @@ class AIPlayer {
     
     func random() -> Piece {
         let pos = Position(board.size - 2, board.size - 1)
-        return Piece(board.playerB, pos)
+        return Piece(.Black, pos)
     }
 }
 
@@ -567,7 +562,11 @@ class RootViewController: UIViewController {
             // user selects their own piece == highlight it or unhighlight it
             if let piece = board.pieceAt(pos) {
                 if piece.player == player {
-                    board.highlight(piece: piece, highlight: !piece.highlighted)
+                    var highlight = false
+                    if let highlightedPiece = board.highlightedPiece() {
+                        highlight = piece == highlightedPiece
+                    }
+                    board.highlight(piece: piece, highlight: highlight)
                 }
                 boardView.render()
                 return
