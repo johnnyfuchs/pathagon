@@ -64,6 +64,9 @@ public enum Player: Printable, Hashable, Equatable {
     public var description:String {
         return (self == .White ? "White" : "Black")
     }
+    public func otherPlayer() -> Player {
+        return self == .White ? .Black : .White
+    }
 }
 
 public func == (lhs: Piece, rhs: Piece) -> Bool {
@@ -220,9 +223,7 @@ public class Board:Printable {
     
     public func currentPlayer() -> Player {
         if let lastPlayer = lastPiece?.player {
-            if lastPlayer == .White {
-                return .Black
-            }
+            return lastPlayer.otherPlayer()
         }
         return .White
     }
@@ -263,13 +264,11 @@ public class Board:Printable {
         return true
     }
     
-    func highlight(piece pieceToHighlight:Piece, highlight:Bool){
-        if !highlight {
-            grid.unhighlight()
+    func toggleHighlight(pos:Position) {
+        if pieceAt(pos) != nil {
+            grid.highlight(pos)
         } else {
-            if pieceAt(pieceToHighlight.position) != nil {
-                grid.highlight(pieceToHighlight.position)
-            }
+            grid.unhighlight()
         }
     }
     
@@ -481,7 +480,7 @@ class BoardView: UIView {
         let frame = rectForTileAt(pos.y, pos.x)
         let pieceView = UIView(frame: frame)
         pieceView.layer.cornerRadius = frame.width / 2.0
-        pieceView.backgroundColor = piece.player == .White ? UIColor.whiteColor() : UIColor.blackColor()
+        pieceView.backgroundColor = piece.player == .White ? UIColor.greenColor() : UIColor.blueColor()
         if let highlightedPiece = board.highlightedPiece() {
             if highlightedPiece == piece {
                 pieceView.backgroundColor = UIColor.yellowColor()
@@ -530,16 +529,22 @@ class AIPlayer {
     
     var board:Board
     
-    init( board:Board) {
+    init(_ board:Board) {
         self.board = board
     }
     
-    func play(board:Board) -> Piece {
-        return random()
+    func takeTurn(board:Board) -> Piece {
+        let piece = random()
+        if board.canPlay(piece) {
+            return piece
+        } else {
+            return takeTurn(board)
+        }
     }
     
     func random() -> Piece {
-        let pos = Position(board.size - 2, board.size - 1)
+        let size = UInt32(board.size - 1)
+        let pos = Position( Int(arc4random_uniform(size)), Int(arc4random_uniform(size)))
         return Piece(.Black, pos)
     }
 }
@@ -549,6 +554,7 @@ class RootViewController: UIViewController {
     override func viewDidLoad(){
         super.viewDidLoad()
         let board = Board(size: 7)
+        let ai = AIPlayer(board)
         board.onWinner = { (player:Player) in
             let title = "\(player) won"
             UIAlertView(title: "Winner!", message:title, delegate: nil, cancelButtonTitle: "Cancel").show()
@@ -562,29 +568,25 @@ class RootViewController: UIViewController {
             // user selects their own piece == highlight it or unhighlight it
             if let piece = board.pieceAt(pos) {
                 if piece.player == player {
-                    var highlight = false
-                    if let highlightedPiece = board.highlightedPiece() {
-                        highlight = piece == highlightedPiece
-                    }
-                    board.highlight(piece: piece, highlight: highlight)
+                    board.toggleHighlight(pos)
                 }
                 boardView.render()
-                return
             }
             
             // if a piece is highlighted, move a piece
-            if let piece = board.highlightedPiece() {
+            else if let piece = board.highlightedPiece() {
                 board.move(piece.position, to: pos)
                 boardView.render()
-                return
             }
             
             // if the player has pieces left, play it
-            if board.piecesLeftForPlayer(player) > 0 {
+            else if board.piecesLeftForPlayer(player) > 0 {
                 board.play(Piece(player, pos))
                 boardView.render()
-                return
             }
+            
+            board.play(ai.takeTurn(board))
+            boardView.render()
         }
     }
 }
