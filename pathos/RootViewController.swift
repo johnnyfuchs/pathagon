@@ -66,21 +66,6 @@ public enum Player: Printable, Hashable, Equatable {
     }
 }
 
-//public class Player:Equatable, Hashable, Printable {
-//    
-//
-//    
-//    public var hashValue: Int {
-//        return name.hashValue
-//    }
-//    
-//    public var name:String
-//    
-//    public init(name:String){
-//        self.name = name
-//    }
-//}
-
 public func == (lhs: Piece, rhs: Piece) -> Bool {
     return lhs.position == rhs.position && lhs.player == rhs.player;
 }
@@ -152,6 +137,9 @@ public class BoardGrid: Printable {
     }
     
     public func pieceAt(pos:Position) -> Piece? {
+        if pos.x < 0 || pos.x > Int(size) - 1 || pos.y < 0 || pos.y > Int(size) - 1 {
+            return nil
+        }
         let intPiece = one << (UInt64(pos.x) * size + UInt64(pos.y))
         if white & intPiece > 0 {
             return Piece(.White, pos)
@@ -173,12 +161,12 @@ public class BoardGrid: Printable {
         highlight = 0
     }
     
-    public func highlighted() -> Position? {
+    public func highlighted() -> Piece? {
         for x in 0...size-1 {
             for y in 0...size-1 {
                 let intPiece = one << (x * size + y)
                 if highlight & intPiece > 0 {
-                    return Position(Int(x), Int(y))
+                    return pieceAt(Position(Int(x), Int(y)))
                 }
             }
         }
@@ -217,24 +205,24 @@ public class BoardGrid: Printable {
         o += "---------------"
         return o
     }
-
 }
 
-public class Board {
+public class Board:Printable {
     
     var size = 7
     public let piecesPerPlayer = 14
-    var pieces:[Piece] = []
     var removedPieces:[Piece] = []
     let goals:[Direction] = [.N, .S, .E, .W]
     public let playerA:Player = .White
     public let playerB:Player = .Black
     var lastPiece:Piece?
+    var grid:BoardGrid
     
     var onWinner:(player:Player) -> () = { (player) in }
     
     public init(size:Int) {
         self.size = size
+        grid = BoardGrid(size: UInt64(size))
     }
     
     public func currentPlayer() -> Player {
@@ -259,7 +247,7 @@ public class Board {
     
     public func play(piece:Piece) -> Bool {
         if canPlay(piece) {
-            pieces.append(piece)
+            grid.add(piece)
             completeMove(piece)
             return true
         }
@@ -267,46 +255,37 @@ public class Board {
     }
     
     public func canPlay(targetPiece:Piece) -> Bool {
-        for piece in pieces {
-            if piece.position == targetPiece.position {
-                return false
-            }
-        }
-        for piece in removedPieces {
-            if piece.position == targetPiece.position {
-                return false
-            }
-        }
-        
         let pos = targetPiece.position
         
-        return pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size
+        if pieceAt(pos) != nil {
+            return false
+        }
+        
+        for piece in removedPieces {
+            if piece.position == pos {
+                return false
+            }
+        }
+        
+        return true
     }
     
     func highlight(piece pieceToHighlight:Piece, highlight:Bool){
-        for piece in pieces {
-            piece.highlight(false)
-        }
         if !highlight {
-            return
-        }
-        let pos = pieceToHighlight.position
-        if let targetPiece = pieceAt(pos) {
-            targetPiece.highlighted = true
+            grid.unhighlight()
+        } else {
+            if pieceAt(pieceToHighlight.position) != nil {
+                grid.highlight(pieceToHighlight.position)
+            }
         }
     }
     
     func highlightedPiece() -> Piece? {
-        for piece in pieces {
-            if piece.highlighted {
-                return piece
-            }
-        }
-        return nil
+        return grid.highlighted()
     }
     
     func completeMove(piece:Piece) {
-        piece.highlighted = false
+        grid.unhighlight()
         lastPiece = piece
         let trappedPieces = piecesTrappedBy(piece)
         removePieces(trappedPieces)
@@ -317,12 +296,7 @@ public class Board {
     }
     
     public func pieceAt(position:Position) -> Piece? {
-        for piece in pieces {
-            if piece.position == position {
-                return piece
-            }
-        }
-        return nil
+        return grid.pieceAt(position)
     }
     
     public func piecesTrappedBy(piece:Piece) -> [Piece] {
@@ -345,19 +319,14 @@ public class Board {
     }
     
     public func removePieces(piecesToRemove:[Piece]) {
-        pieces = pieces.filter { (piece:Piece) -> Bool in
-            for pieceToRemove in piecesToRemove {
-                if piece == pieceToRemove {
-                    return false
-                }
-            }
-            return true
+        for piece in piecesToRemove {
+            grid.remove(piece)
         }
     }
     
     public func piecesLeftForPlayer(player:Player) -> Int {
         var playedPieces = 0
-        for piece in pieces {
+        for piece in grid.allPieces() {
             if piece.player == player {
                 playedPieces++
             }
@@ -387,7 +356,7 @@ public class Board {
     
     func piecesInRow(row:Int, player:Player) -> [Piece] {
         var rowPieces:[Piece] = []
-        for piece in pieces {
+        for piece in grid.allPieces() {
             if piece.position.y == row && player == piece.player {
                 rowPieces.append(piece)
             }
@@ -397,12 +366,19 @@ public class Board {
     
     func piecesInCol(col:Int, player:Player) -> [Piece] {
         var colPieces:[Piece] = []
-        for piece in pieces {
+        for piece in grid.allPieces() {
             if piece.position.x == col  && player == piece.player {
                 colPieces.append(piece)
             }
         }
         return colPieces
+    }
+    
+    func allPieces() -> [Piece] {
+        return grid.allPieces()
+    }
+    public var description:String {
+        return grid.description
     }
 }
 
@@ -502,7 +478,7 @@ class BoardView: UIView {
     }
     
     func drawPieces(){
-        for p in board.pieces {
+        for p in board.allPieces() {
             draw(p)
         }
     }

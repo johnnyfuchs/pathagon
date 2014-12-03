@@ -50,7 +50,7 @@ class pathosTests: XCTestCase {
     func testSurroundingPieces() {
         let playerOne:Player = .White
         let playerTwo:Player = .Black
-        let board = Board(size: 8)
+        let board = Board(size: 7)
         let a = Piece(playerOne, Position(1,2))
         let b = Piece(playerOne, Position(2,1))
         let c = Piece(playerOne, Position(2,3))
@@ -84,18 +84,18 @@ class pathosTests: XCTestCase {
     
     func testRemoveJumps() {
 
-        let board = Board(size: 8)
-        let a = Piece(board.playerA, Position(1,2))
-        let b = Piece(board.playerA, Position(2,1))
-        let c = Piece(board.playerA, Position(2,3))
-        let d = Piece(board.playerA, Position(3,2))
+        let board = Board(size: 7)
+        let a = Piece(.White, Position(1,2))
+        let b = Piece(.White, Position(2,1))
+        let c = Piece(.White, Position(2,3))
+        let d = Piece(.White, Position(3,2))
         
-        let e = Piece(board.playerB, Position(0,2))
-        let f = Piece(board.playerB, Position(2,0))
-        let g = Piece(board.playerB, Position(4,2))
-        let h = Piece(board.playerB, Position(2,4))
+        let e = Piece(.Black, Position(0,2))
+        let f = Piece(.Black, Position(2,0))
+        let g = Piece(.Black, Position(4,2))
+        let h = Piece(.Black, Position(2,4))
         
-        let x = Piece(board.playerB, Position(2,2))
+        let x = Piece(.Black, Position(2,2))
         
         board.play(a)
         board.play(e)
@@ -110,6 +110,8 @@ class pathosTests: XCTestCase {
         board.play(g)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 4, "Four matching positions")
         let pieces = board.piecesTrappedBy(x)
+        println(pieces)
+        println(board)
         XCTAssert(pieces[0].player == board.playerA, "0 is player 2")
         XCTAssert(pieces[1].player == board.playerA, "1 is player 2")
         XCTAssert(pieces[2].player == board.playerA, "2 is player 2")
@@ -118,7 +120,7 @@ class pathosTests: XCTestCase {
     
     func testPiecesCannotBePlaced() {
         // Assert which pieces are removed
-        let board = Board(size: 8)
+        let board = Board(size: 7)
         
         let pa = Position(1,2)
         let pb = Position(2,1)
@@ -133,7 +135,7 @@ class pathosTests: XCTestCase {
     }
     
     func testTrappedPiecesAreRemoved() {
-        let board = Board(size: 8)
+        let board = Board(size: 7)
         
         let a = Piece(board.playerA, Position(1,2))
         let b = Piece(board.playerA, Position(2,1))
@@ -162,7 +164,7 @@ class pathosTests: XCTestCase {
     
     func testPiecesLeft() {
 
-        let board = Board(size: 8)
+        let board = Board(size: 7)
         
         let a = Piece(board.playerA, Position(1,2))
         let b = Piece(board.playerA, Position(2,1))
@@ -184,7 +186,6 @@ class pathosTests: XCTestCase {
         XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer - 3, "remaining pieces")
         board.play(d)
         XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer - 4, "remaining pieces")
-        
         board.play(e)
          XCTAssertEqual( board.piecesLeftForPlayer(board.playerB), board.piecesPerPlayer - 1, "remaining pieces")
         board.play(f)
@@ -194,7 +195,6 @@ class pathosTests: XCTestCase {
         board.play(h)
          XCTAssertEqual( board.piecesLeftForPlayer(board.playerB), board.piecesPerPlayer - 4, "remaining pieces")
         board.play(x)
-        
         XCTAssertEqual( board.piecesLeftForPlayer(board.playerA), board.piecesPerPlayer, "resets remaining pieces")
     }
     
@@ -224,8 +224,8 @@ class pathosTests: XCTestCase {
         var board = BoardGrid()
         board.add(Piece(.White, Position(0,0)))
         board.add(Piece(.White, Position(0,1)))
-        XCTAssertNotNil( board.pieceAt(Position(0,0)), "piece exists")
-        XCTAssertNotNil( board.pieceAt(Position(0,1)), "piece exists")
+        XCTAssert(board.pieceAt(Position(0,0)) != nil, "piece exists")
+        XCTAssert(board.pieceAt(Position(0,1)) != nil, "piece exists")
     }
     
     func testBoardGridAddPieces() {
@@ -264,9 +264,10 @@ class pathosTests: XCTestCase {
     
     func testHighlightsAPiece() {
         var board = BoardGrid()
-        board.add(Piece(.White, Position(4,1)))
-        board.highlight(Position(4,1))
-        XCTAssert(board.highlighted()! == Position(4,1), "highlights a piece")
+        let piece = Piece(.White, Position(4,1))
+        board.add(piece)
+        board.highlight(piece.position)
+        XCTAssert(board.highlighted() != nil, "highlights a piece")
         board.unhighlight()
         XCTAssert(board.highlighted() == nil, "unhighlights a piece")
     }
