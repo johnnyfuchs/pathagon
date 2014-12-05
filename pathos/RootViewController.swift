@@ -693,16 +693,13 @@ func alphabeta(node:BoardGrid, depth:UInt, startAlpha:Int, startBeta:Int, maximi
     
     if depth == 0 {
         let huer = hueristic(node)
-        if( huer > 10 ){
-            println(huer)
-        }
         return huer
     }
     if maximizingPlayer {
 
         for child in node.childBoards() {
             alpha = max(alpha, alphabeta(child, depth - 1, alpha, beta, false))
-            println("b \(depth), \(alpha), \(beta), \(maximizingPlayer)")
+            //println("b \(depth), \(alpha), \(beta), \(maximizingPlayer)")
 
             if beta <= alpha {
                 break;
@@ -712,7 +709,7 @@ func alphabeta(node:BoardGrid, depth:UInt, startAlpha:Int, startBeta:Int, maximi
     } else {
         for child in node.childBoards() {
             beta = min(beta, alphabeta(child, depth - 1, alpha, beta, true))
-            println("c \(depth), \(alpha), \(beta), \(maximizingPlayer)")
+            //println("c \(depth), \(alpha), \(beta), \(maximizingPlayer)")
 
             if beta <= alpha {
                 break;
