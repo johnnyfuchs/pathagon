@@ -95,15 +95,29 @@ public struct Piece : Printable, Equatable, Hashable {
     }
 }
 
-public class BoardGrid: Printable {
+public class BoardGrid: Printable, NSCopying {
     var white:UInt64 = 0
     var black:UInt64 = 0
+    var whiteRemoved:UInt64 = 0
+    var blackRemoved:UInt64 = 0
     var highlight:UInt64 = 0
     let maxSize:UInt64 = 8
     let size:UInt64 = 7
     let one:UInt64 = 1
+    public var lastPiece:Piece?
+    public let piecesPerPlayer = 14
 
-    public init(){
+    public init(){ }
+    
+    public func copyWithZone(zone: NSZone) -> AnyObject {
+        var board = BoardGrid(size: size)
+        board.white = white
+        board.black = black
+        board.blackRemoved = blackRemoved
+        board.whiteRemoved = whiteRemoved
+        board.lastPiece = lastPiece
+        board.highlight = highlight
+        return board
     }
     
     public init(size:UInt64) {
@@ -122,6 +136,11 @@ public class BoardGrid: Printable {
         } else {
             black += intPiece
         }
+        whiteRemoved = 0
+        blackRemoved = 0
+        let trappedPieces = piecesTrappedBy(piece)
+        removePieces(trappedPieces)
+        lastPiece = piece
     }
     
     public func remove(piece:Piece) {
@@ -129,8 +148,10 @@ public class BoardGrid: Printable {
         let intPiece = one << (UInt64(pos.x) * size + UInt64(pos.y))
         if piece.player == .White && (white & intPiece > 0) {
             white -= intPiece
+            whiteRemoved += intPiece
         } else if (black & intPiece > 0) {
             black -= intPiece
+            blackRemoved += intPiece
         }
     }
     
@@ -171,6 +192,25 @@ public class BoardGrid: Printable {
         return nil
     }
     
+    public func playablePieces() -> [Piece] {
+        let player = lastPiece != nil ? lastPiece!.player.otherPlayer() : .White
+        let piecesRemoved = removedPieces(player)
+        var playable:[Piece] = []
+        var found = false
+        for piece in emptyPieces(player) {
+            found = false
+            for removed in piecesRemoved {
+                if piece == removed {
+                    found = true
+                }
+            }
+            if !found {
+                playable.append(piece)
+            }
+        }
+        return playable
+    }
+    
     public func allPieces() -> [Piece] {
         var pieces:[Piece] = []
         for x in 0...size-1 {
@@ -180,6 +220,22 @@ public class BoardGrid: Printable {
                     pieces.append(Piece(.Black, Position(Int(x), Int(y))))
                 }
                 if white & intPiece > 0 {
+                    pieces.append(Piece(.White, Position(Int(x), Int(y))))
+                }
+            }
+        }
+        return pieces
+    }
+    
+    public func emptyPieces(player:Player) -> [Piece] {
+        var pieces:[Piece] = []
+        for x in 0...size-1 {
+            for y in 0...size-1 {
+                let intPiece = one << (x * size + y)
+                if black & intPiece == 0 && player == .Black {
+                    pieces.append(Piece(.Black, Position(Int(x), Int(y))))
+                }
+                if white & intPiece == 0 && player == .White {
                     pieces.append(Piece(.White, Position(Int(x), Int(y))))
                 }
             }
@@ -203,13 +259,164 @@ public class BoardGrid: Printable {
         o += "---------------"
         return o
     }
+    
+    public func pathExists(start:Piece, _ end:Piece) -> Bool {
+        
+        func heuristic(a:Position, b:Position) -> Int {
+            return abs(a.x - b.x) + abs(a.y - b.y)
+        }
+        
+        func neigbors(position:Position) -> [Piece] {
+            var pieces:[Piece] = []
+            let dirs:[Direction] = [.N, .E, .S, .W]
+            for dir in dirs {
+                if let piece = pieceAt(position + dir.toCoord()){
+                    if piece.player == start.player {
+                        pieces.append(piece)
+                    }
+                }
+            }
+            return pieces
+        }
+        
+        var frontier = PriorityQueue<Int, Piece>()
+        frontier.push(0, item: start)
+        var path = Dictionary<Piece, Piece>()
+        var costs = Dictionary<Piece, Int>()
+        
+        while !frontier.empty() {
+            let current = frontier.pop()!.1
+            
+            if current == end {
+                return true
+            }
+            
+            let neighbors = neigbors(current.position)
+            for neighbor in neighbors {
+                let newCost = costs[current] ?? 0 + heuristic(neighbor.position, end.position)
+                
+                if costs[neighbor] == nil || newCost < (costs[neighbor] ?? 0) {
+                    costs[neighbor] = newCost
+                    let priority = newCost + heuristic(neighbor.position, end.position)
+                    frontier.push(priority, item: neighbor)
+                    path[neighbor] = current
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    public func piecesTrappedBy(piece:Piece) -> [Piece] {
+        let player = piece.player
+        var matches:[Piece] = []
+        let dirs:[Direction] = [.N, .S, .E, .W]
+        let pos = piece.position
+        for d in dirs {
+            if let captureable = pieceAt(pos + d.toCoord()) {
+                if captureable.player !== player {
+                    if let trapping = pieceAt(pos + d.toCoord() + d.toCoord()) {
+                        if trapping.player == player {
+                            matches.append(captureable)
+                        }
+                    }
+                }
+            }
+        }
+        return matches
+    }
+    
+    public func removePieces(piecesToRemove:[Piece]) {
+        for piece in piecesToRemove {
+            remove(piece)
+        }
+    }
+    
+    public func removedPieces(player:Player) -> [Piece] {
+        var pieces:[Piece] = []
+        for x in 0...size-1 {
+            for y in 0...size-1 {
+                let intPiece = one << (x * size + y)
+                if blackRemoved & intPiece > 0 {
+                    pieces.append(Piece(.Black, Position(Int(x), Int(y))))
+                }
+                if whiteRemoved & intPiece > 0 {
+                    pieces.append(Piece(.White, Position(Int(x), Int(y))))
+                }
+            }
+        }
+        return pieces
+
+    }
+    
+    public func piecesLeftForPlayer(player:Player) -> Int {
+        var playedPieces = 0
+        for piece in allPieces() {
+            if piece.player == player {
+                playedPieces++
+            }
+        }
+        return piecesPerPlayer - playedPieces
+    }
+    
+    public func winExistsFor(player:Player) -> Bool {
+        
+        if piecesLeftForPlayer(player) < Int(size) {
+            return false
+        }
+        
+        var startNodes:[Piece] = player == .White ? piecesInRow(0, player: player) : piecesInCol(0, player: player)
+        var endNodes:[Piece] = player == .White ? piecesInRow(size - 1, player: player) : piecesInCol(size - 1, player: player)
+        
+        if !(startNodes.count > 0 && endNodes.count > 0) {
+            return false
+        } else {
+            for start in startNodes {
+                for end in endNodes {
+                    if pathExists(start, end) {
+                        return true
+                    }
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    func piecesInRow(row:Int, player:Player) -> [Piece] {
+        var rowPieces:[Piece] = []
+        for piece in allPieces() {
+            if piece.position.y == row && player == piece.player {
+                rowPieces.append(piece)
+            }
+        }
+        return rowPieces
+    }
+    
+    func piecesInCol(col:Int, player:Player) -> [Piece] {
+        var colPieces:[Piece] = []
+        for piece in allPieces() {
+            if piece.position.x == col  && player == piece.player {
+                colPieces.append(piece)
+            }
+        }
+        return colPieces
+    }
+    
+    public func childBoards() -> [BoardGrid] {
+        var boards:[BoardGrid] = []
+        for piece in playablePieces() {
+            var board:BoardGrid = copyWithZone(nil) as BoardGrid
+            board.add(piece)
+            boards.append(board)
+        }
+        return boards
+    }
 }
 
 public class Board:Printable {
     
     var size = 7
-    public let piecesPerPlayer = 14
-    var removedPieces:[Piece] = []
     let goals:[Direction] = [.N, .S, .E, .W]
     var lastPiece:Piece?
     var grid:BoardGrid
@@ -249,19 +456,12 @@ public class Board:Printable {
     }
     
     public func canPlay(targetPiece:Piece) -> Bool {
-        let pos = targetPiece.position
-        
-        if pieceAt(pos) != nil {
-            return false
-        }
-        
-        for piece in removedPieces {
-            if piece.position == pos {
-                return false
+        for piece in grid.playablePieces() {
+            if targetPiece == piece {
+                return true
             }
         }
-        
-        return true
+        return false
     }
     
     func toggleHighlight(pos:Position) {
@@ -279,9 +479,6 @@ public class Board:Printable {
     func completeMove(piece:Piece) {
         grid.unhighlight()
         lastPiece = piece
-        let trappedPieces = piecesTrappedBy(piece)
-        removePieces(trappedPieces)
-        removedPieces = trappedPieces
         if winExistsFor(piece.player) {
             self.onWinner(player: piece.player)
         }
@@ -291,79 +488,12 @@ public class Board:Printable {
         return grid.pieceAt(position)
     }
     
-    public func piecesTrappedBy(piece:Piece) -> [Piece] {
-        let player = piece.player
-        var matches:[Piece] = []
-        let dirs:[Direction] = [.N, .S, .E, .W]
-        let pos = piece.position
-        for d in dirs {
-            if let captureable = pieceAt(pos + d.toCoord()) {
-                if captureable.player !== player {
-                    if let trapping = pieceAt(pos + d.toCoord() + d.toCoord()) {
-                        if trapping.player == player {
-                            matches.append(captureable)
-                        }
-                    }
-                }
-            }
-        }
-        return matches
-    }
-    
-    public func removePieces(piecesToRemove:[Piece]) {
-        for piece in piecesToRemove {
-            grid.remove(piece)
-        }
-    }
-    
     public func piecesLeftForPlayer(player:Player) -> Int {
-        var playedPieces = 0
-        for piece in grid.allPieces() {
-            if piece.player == player {
-                playedPieces++
-            }
-        }
-        return piecesPerPlayer - playedPieces
+        return grid.piecesLeftForPlayer(player)
     }
     
     public func winExistsFor(player:Player) -> Bool {
-        
-        var startNodes:[Piece] = player == .White ? piecesInRow(0, player: player) : piecesInCol(0, player: player)
-        var endNodes:[Piece] = player == .White ? piecesInRow(size - 1, player: player) : piecesInCol(size - 1, player: player)
-        
-        if !(startNodes.count > 0 && endNodes.count > 0) {
-            return false
-        } else {
-            for start in startNodes {
-                for end in endNodes {
-                    if pathExists(self, start, end) {
-                        return true
-                    }
-                }
-            }
-        }
-        
-        return false
-    }
-    
-    func piecesInRow(row:Int, player:Player) -> [Piece] {
-        var rowPieces:[Piece] = []
-        for piece in grid.allPieces() {
-            if piece.position.y == row && player == piece.player {
-                rowPieces.append(piece)
-            }
-        }
-        return rowPieces
-    }
-    
-    func piecesInCol(col:Int, player:Player) -> [Piece] {
-        var colPieces:[Piece] = []
-        for piece in grid.allPieces() {
-            if piece.position.x == col  && player == piece.player {
-                colPieces.append(piece)
-            }
-        }
-        return colPieces
+        return grid.winExistsFor(player)
     }
     
     func allPieces() -> [Piece] {
@@ -375,52 +505,7 @@ public class Board:Printable {
 }
 
 
-func pathExists(board:Board, start:Piece, end:Piece) -> Bool {
-    
-    func heuristic(a:Position, b:Position) -> Int {
-        return abs(a.x - b.x) + abs(a.y - b.y)
-    }
-    
-    func neigbors(board:Board, position:Position) -> [Piece] {
-        var pieces:[Piece] = []
-        let dirs:[Direction] = [.N, .E, .S, .W]
-        for dir in dirs {
-            if let piece = board.pieceAt(position + dir.toCoord()){
-                if piece.player == start.player {
-                    pieces.append(piece)
-                }
-            }
-        }
-        return pieces
-    }
-    
-    var frontier = PriorityQueue<Int, Piece>()
-    frontier.push(0, item: start)
-    var path = Dictionary<Piece, Piece>()
-    var costs = Dictionary<Piece, Int>()
-    
-    while !frontier.empty() {
-        let current = frontier.pop()!.1
-        
-        if current == end {
-            return true
-        }
-        
-        let neighbors = neigbors(board, current.position)
-        for neighbor in neighbors {
-            let newCost = costs[current] ?? 0 + heuristic(neighbor.position, end.position)
-            
-            if costs[neighbor] == nil || newCost < (costs[neighbor] ?? 0) {
-                costs[neighbor] = newCost
-                let priority = newCost + heuristic(neighbor.position, end.position)
-                frontier.push(priority, item: neighbor)
-                path[neighbor] = current
-            }
-        }
-    }
-    
-    return false
-}
+
 
 class BoardView: UIView {
     var board:Board
@@ -534,12 +619,28 @@ class AIPlayer {
     }
     
     func takeTurn(board:Board) -> Piece {
-        let piece = random()
+        let piece = idealPiece()
         if board.canPlay(piece) {
             return piece
         } else {
             return takeTurn(board)
         }
+    }
+    
+    func idealPiece() -> Piece {
+
+        var bestPiece:Piece = Piece(board.currentPlayer(), Position(Int(arc4random_uniform(UInt32(board.size))), Int(arc4random_uniform(UInt32(board.size)))))
+        var bestScore = 0
+        let childboards = board.grid.childBoards()
+        for node in  childboards {
+            let alpha = alphabeta(node, 1, Int.min, Int.max, true)
+            if alpha > bestScore {
+                bestScore = alpha
+                bestPiece = node.lastPiece!
+            }
+        }
+        
+        return bestPiece
     }
     
     func random() -> Piece {
@@ -548,6 +649,79 @@ class AIPlayer {
         return Piece(.Black, pos)
     }
 }
+
+func hueristic(grid:BoardGrid) -> Int {
+    
+    if grid.lastPiece == nil {
+        return Int(arc4random_uniform(10)) - 10
+    }
+    
+    let piece:Piece = grid.lastPiece!
+    let otherPlayer:Player = piece.player == .White ? .Black : .White
+    
+    if grid.winExistsFor(piece.player) {
+        return 999999
+    }
+    
+    // if the piece captures another player
+    // thats +100 for each piece
+    let removed = grid.removedPieces(otherPlayer).count
+    if removed > 0 {
+        return 1000 * removed
+    }
+    
+    // if a pieces touches another one of your pieces, that's +10
+    // if a piece touches other player, that's -10
+    let dirs:[Direction] = [.N, .E, .S, .W]
+    var touching = 0
+    for d in dirs {
+        if let touchingPiece = grid.pieceAt(piece.position + d.toCoord()) {
+            if piece.player == otherPlayer {
+                touching -= 10
+            } else {
+                touching += 10
+            }
+        }
+    }
+    
+    return touching
+}
+
+func alphabeta(node:BoardGrid, depth:UInt, startAlpha:Int, startBeta:Int, maximizingPlayer:Bool) -> Int {
+    var alpha = startAlpha
+    var beta = startBeta
+    
+    if depth == 0 {
+        let huer = hueristic(node)
+        if( huer > 10 ){
+            println(huer)
+        }
+        return huer
+    }
+    if maximizingPlayer {
+
+        for child in node.childBoards() {
+            alpha = max(alpha, alphabeta(child, depth - 1, alpha, beta, false))
+            println("b \(depth), \(alpha), \(beta), \(maximizingPlayer)")
+
+            if beta <= alpha {
+                break;
+            }
+        }
+        return alpha
+    } else {
+        for child in node.childBoards() {
+            beta = min(beta, alphabeta(child, depth - 1, alpha, beta, true))
+            println("c \(depth), \(alpha), \(beta), \(maximizingPlayer)")
+
+            if beta <= alpha {
+                break;
+            }
+        }
+        return beta
+    }
+}
+
 
 class RootViewController: UIViewController {
     
@@ -560,6 +734,7 @@ class RootViewController: UIViewController {
             UIAlertView(title: "Winner!", message:title, delegate: nil, cancelButtonTitle: "Cancel").show()
         }
         var boardView = BoardView(frame: CGRectMake(0, 0, view.frame.size.width, view.frame.size.width), board: board)
+        boardView.center = view.center
         view.addSubview(boardView)
         boardView.render()
         boardView.onTileTapped = { (pos:Position) in

@@ -50,7 +50,7 @@ class pathosTests: XCTestCase {
     func testSurroundingPieces() {
         let playerOne:Player = .White
         let playerTwo:Player = .Black
-        let board = Board(size: 7)
+        let board = BoardGrid(size: 7)
         let a = Piece(playerOne, Position(1,2))
         let b = Piece(playerOne, Position(2,1))
         let c = Piece(playerOne, Position(2,3))
@@ -63,17 +63,17 @@ class pathosTests: XCTestCase {
         
         let x = Piece(playerTwo, Position(2,2))
         
-        board.play(a)
-        board.play(e)
+        board.add(a)
+        board.add(e)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 1, "One matching position")
-        board.play(b)
-        board.play(f)
+        board.add(b)
+        board.add(f)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 2, "Two matching positions")
-        board.play(c)
-        board.play(h)
+        board.add(c)
+        board.add(h)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 3, "Three matching positions")
-        board.play(d)
-        board.play(g)
+        board.add(d)
+        board.add(g)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 4, "Four matching positions")
         let pieces = board.piecesTrappedBy(x)
         XCTAssert(pieces[0].player == playerOne, "0 is player 2")
@@ -84,7 +84,7 @@ class pathosTests: XCTestCase {
     
     func testRemoveJumps() {
 
-        let board = Board(size: 7)
+        let board = BoardGrid(size: 7)
         let a = Piece(.White, Position(1,2))
         let b = Piece(.White, Position(2,1))
         let c = Piece(.White, Position(2,3))
@@ -97,17 +97,17 @@ class pathosTests: XCTestCase {
         
         let x = Piece(.Black, Position(2,2))
         
-        board.play(a)
-        board.play(e)
+        board.add(a)
+        board.add(e)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 1, "One matching position")
-        board.play(b)
-        board.play(f)
+        board.add(b)
+        board.add(f)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 2, "Two matching positions")
-        board.play(c)
-        board.play(h)
+        board.add(c)
+        board.add(h)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 3, "Three matching positions")
-        board.play(d)
-        board.play(g)
+        board.add(d)
+        board.add(g)
         XCTAssertEqual(board.piecesTrappedBy(x).count, 4, "Four matching positions")
         let pieces = board.piecesTrappedBy(x)
         println(pieces)
@@ -164,7 +164,7 @@ class pathosTests: XCTestCase {
     
     func testPiecesLeft() {
 
-        let board = Board(size: 7)
+        let board = BoardGrid(size: 7)
         
         let a = Piece(.White, Position(1,2))
         let b = Piece(.White, Position(2,1))
@@ -178,23 +178,23 @@ class pathosTests: XCTestCase {
         
         let x = Piece(.Black, Position(2,2))
         
-        board.play(a)
+        board.add(a)
         XCTAssertEqual( board.piecesLeftForPlayer(.White), board.piecesPerPlayer - 1, "remaining pieces")
-        board.play(b)
+        board.add(b)
         XCTAssertEqual( board.piecesLeftForPlayer(.White), board.piecesPerPlayer - 2, "remaining pieces")
-        board.play(c)
+        board.add(c)
         XCTAssertEqual( board.piecesLeftForPlayer(.White), board.piecesPerPlayer - 3, "remaining pieces")
-        board.play(d)
+        board.add(d)
         XCTAssertEqual( board.piecesLeftForPlayer(.White), board.piecesPerPlayer - 4, "remaining pieces")
-        board.play(e)
+        board.add(e)
          XCTAssertEqual( board.piecesLeftForPlayer(.Black), board.piecesPerPlayer - 1, "remaining pieces")
-        board.play(f)
+        board.add(f)
          XCTAssertEqual( board.piecesLeftForPlayer(.Black), board.piecesPerPlayer - 2, "remaining pieces")
-        board.play(g)
+        board.add(g)
          XCTAssertEqual( board.piecesLeftForPlayer(.Black), board.piecesPerPlayer - 3, "remaining pieces")
-        board.play(h)
+        board.add(h)
          XCTAssertEqual( board.piecesLeftForPlayer(.Black), board.piecesPerPlayer - 4, "remaining pieces")
-        board.play(x)
+        board.add(x)
         XCTAssertEqual( board.piecesLeftForPlayer(.White), board.piecesPerPlayer, "resets remaining pieces")
     }
     
