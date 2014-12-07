@@ -756,9 +756,11 @@ class RootViewController: UIViewController {
                 board.play(Piece(player, pos))
                 boardView.render()
             }
-            
-            board.play(ai.takeTurn(board))
             boardView.render()
+            dispatch_async(dispatch_get_main_queue(), {
+                board.play(ai.takeTurn(board))
+                boardView.render()
+            })
         }
     }
 }

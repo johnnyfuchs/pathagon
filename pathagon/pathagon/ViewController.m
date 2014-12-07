@@ -32,13 +32,18 @@
     self.boardView.board = board;
     self.boardView.onTap = ^(Position position){
         Player player = [board currentPlayer];
-
         Piece piece = [board pieceAt:position];
-        if(isPiece(piece)){
-            [board highlight:piece.position];
+        Piece highlighted = board.highlightedPiece;
+
+        if (isPiece(piece) && piece.player == player) {
+            if(PiecesEqual(piece, highlighted)){
+                [board unhighlight];
+            } else {
+                [board highlight:piece.position];
+            }
         }
 
-        else if(isPiece(board.highlightedPiece)){
+        else if(isPiece(highlighted) && [board canPlay:piece]){
             [board move:board.highlightedPiece to:piece.position];
         }
 
@@ -47,8 +52,12 @@
         }
 
         boardView.board = board;
-        //[ai takeTurn:board];
-        boardView.board = board;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [ai takeTurn:board];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                boardView.board = board;
+            });
+        });
     };
 }
 

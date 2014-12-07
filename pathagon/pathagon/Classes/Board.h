@@ -28,6 +28,8 @@ static const Player startingPlayer = White;
 
 - (void)highlight:(Position)position;
 
+- (void)unhighlight;
+
 - (Piece)highlightedPiece;
 
 - (NSInteger)piecesLeftForPlayer:(Player)player;
@@ -37,5 +39,7 @@ static const Player startingPlayer = White;
 - (NSArray *)childBoards;
 
 - (BOOL)canPlay:(Piece)piece;
+
+- (PieceList)piecesTrappedBy:(Piece)piece;
 
 @end

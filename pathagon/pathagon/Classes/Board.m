@@ -30,7 +30,7 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (void) add:(Piece)piece {
-    uint64_t intPiece = IntPosition(piece.position);
+    uint64_t intPiece = IntFromPosition(piece.position);
     if (_white & intPiece || _black & intPiece) {
         return;
     }
@@ -47,8 +47,8 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (void) move:(Piece)piece to:(Position)position {
-    uint64_t from = IntPosition(piece.position);
-    uint64_t to = IntPosition(position);
+    uint64_t from = IntFromPosition(piece.position);
+    uint64_t to = IntFromPosition(position);
     if(piece.player == White){
         _white -= from;
         _white += to;
@@ -59,7 +59,7 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (void) remove:(Piece) piece {
-    uint64_t intPiece = IntPosition(piece.position);
+    uint64_t intPiece = IntFromPosition(piece.position);
 
     if(piece.player == White && _white & intPiece) {
         _white += intPiece;
@@ -71,15 +71,15 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (PieceList) removedPieces {
-    PieceList all;
+    PieceList all = PieceListMake();
     for (int x=0; x<boardSize-1; x++){
         for(int y=0; y<boardSize-1; y++){
             Position pos = PositionMake(x, y);
-            uint64_t intPos = IntPosition(pos);
+            uint64_t intPos = IntFromPosition(pos);
             if(intPos & _blackRemoved){
-                PieceListAddPiece(&all, MakePiece(Black, pos));
+                PieceListAppend(&all, MakePiece(Black, pos));
             } else if (intPos & _whiteRemoved) {
-                PieceListAddPiece(&all, MakePiece(White, pos));
+                PieceListAppend(&all, MakePiece(White, pos));
             }
         }
     }
@@ -90,7 +90,7 @@ static inline int PathHeuristic(Position a, Position b){
     if (pos.x < 0 || pos.x > boardSize - 1 || pos.y < 0 || pos.y > boardSize - 1) {
         return MakePiece(NotAPlayer, PositionMake(0, 0));
     }
-    uint64_t intPiece = IntPosition(pos);
+    uint64_t intPiece = IntFromPosition(pos);
     if (_white & intPiece) {
         return MakePiece(White, pos);
     }
@@ -101,11 +101,13 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (void) highlight:(Position) position {
-    if (isPiece([self pieceAt:position])){
-        _highlight = IntPosition(position);
-    } else {
-        _highlight = 0;
+    if (isPiece([self pieceAt:position])) {
+        _highlight = IntFromPosition(position);
     }
+}
+
+- (void) unhighlight {
+    _highlight = 0;
 }
 
 - (Piece) highlightedPiece {
@@ -120,16 +122,16 @@ static inline int PathHeuristic(Position a, Position b){
 
 - (PieceList) playablePieces {
     Player player = self.currentPlayer;
-    PieceList playable;
+    PieceList playable = PieceListMake();
     for (int x=0; x<boardSize-1; x++){
         for(int y=0; y<boardSize-1; y++){
             Position pos = PositionMake(x, y);
-            uint64_t intPos = IntPosition(pos);
+            uint64_t intPos = IntFromPosition(pos);
             if(     !( intPos & _black
                     || intPos & _white
                     || intPos & _blackRemoved
                     || intPos & _whiteRemoved)){
-                PieceListAddPiece(&playable, MakePiece(player, pos));
+                PieceListAppend(&playable, MakePiece(player, pos));
             }
         }
     }
@@ -137,15 +139,15 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (PieceList) allPieces {
-    PieceList all;
+    PieceList all = PieceListMake();
     for (int x=0; x<boardSize-1; x++){
         for(int y=0; y<boardSize-1; y++){
             Position pos = PositionMake(x, y);
-            uint64_t intPos = IntPosition(pos);
+            uint64_t intPos = IntFromPosition(pos);
             if(intPos & _black){
-                PieceListAddPiece(&all, MakePiece(Black, pos));
+                PieceListAppend(&all, MakePiece(Black, pos));
             } else if (intPos & _white) {
-                PieceListAddPiece(&all, MakePiece(White, pos));
+                PieceListAppend(&all, MakePiece(White, pos));
             }
         }
     }
@@ -153,12 +155,12 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (PieceList)connectedPieces:(Piece)piece {
-    PieceList all;
+    PieceList all = PieceListMake();
     Direction directions[4] = {N, S, E, W};
     for(int i=0; i<4; i++){
         Piece match = [self pieceAt:AddPositions(piece.position, PositionForDirection(directions[i]))];
         if(isPiece(match) && piece.player == match.player){
-            PieceListAddPiece(&all, piece);
+            PieceListAppend(&all, piece);
         }
     }
     return all;
@@ -217,7 +219,7 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (PieceList)piecesTrappedBy:(Piece)piece {
-    PieceList result = PieceListMake();
+    PieceList list = PieceListMake();
     Direction directions[4] = {N, S, E, W};
     for(int i=0; i<4; i++) {
         Position directedPosition = AddPositions(piece.position, PositionForDirection(directions[i]));
@@ -225,11 +227,11 @@ static inline int PathHeuristic(Position a, Position b){
         if(isPiece(captureable) && captureable.player != piece.player){
             Piece trapping = [self pieceAt:AddPositions(directedPosition, PositionForDirection(directions[i]))];
             if(isPiece(trapping) && trapping.player == piece.player){
-                PieceListAddPiece(&result, captureable);
+                PieceListAppend(&list, captureable);
             }
         }
     }
-    return result;
+    return list;
 }
 
 -(BOOL) winExistsForPlayer:(Player)player {
@@ -259,9 +261,9 @@ static inline int PathHeuristic(Position a, Position b){
     uint64_t playerInt = player == White ? _white : _black;
     for(int col=0; col < boardSize; col++){
         Position pos = PositionMake(col, row);
-        uint64_t pieceInt = IntPosition(pos);
+        uint64_t pieceInt = IntFromPosition(pos);
         if(pieceInt &  playerInt){
-            PieceListAddPiece(&pieces, MakePiece(player, pos));
+            PieceListAppend(&pieces, MakePiece(player, pos));
         }
     }
     return pieces;
@@ -272,9 +274,9 @@ static inline int PathHeuristic(Position a, Position b){
     uint64_t playerInt = player == White ? _white : _black;
     for(int row=0; row < boardSize; row++){
         Position pos = PositionMake(col, row);
-        uint64_t pieceInt = IntPosition(pos);
+        uint64_t pieceInt = IntFromPosition(pos);
         if(pieceInt &  playerInt){
-            PieceListAddPiece(&pieces, MakePiece(player, pos));
+            PieceListAppend(&pieces, MakePiece(player, pos));
         }
     }
     return pieces;
@@ -283,10 +285,11 @@ static inline int PathHeuristic(Position a, Position b){
 - (NSArray *) childBoards {
     NSMutableArray *boards = [NSMutableArray new];
     PieceList playablePieces = [self playablePieces];
-    for(int idx=0; idx < playablePieces.count; idx++){
+    while(!PieceListIsEmpty(&playablePieces)){
         Board *child = [self copy];
-        [child add:playablePieces.pieces[idx]];
+        [child add:PieceListNextPiece(&playablePieces)];
         [boards addObject:child];
+        NSLog(@"%@", child);
     }
     return boards;
 }

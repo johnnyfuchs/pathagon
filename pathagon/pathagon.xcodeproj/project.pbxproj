@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B26493E01A34703F00EC866B /* BoardStructsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B26493DF1A34703F00EC866B /* BoardStructsTests.m */; };
+		B2935B041A35108200F41358 /* BoardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2935B031A35108200F41358 /* BoardTests.m */; };
 		B2BD075A1A32792000F67AB5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD07591A32792000F67AB5 /* main.m */; };
 		B2BD075D1A32792000F67AB5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD075C1A32792000F67AB5 /* AppDelegate.m */; };
 		B2BD07601A32792000F67AB5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD075F1A32792000F67AB5 /* ViewController.m */; };
 		B2BD07631A32792000F67AB5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B2BD07611A32792000F67AB5 /* Main.storyboard */; };
 		B2BD07651A32792000F67AB5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2BD07641A32792000F67AB5 /* Images.xcassets */; };
 		B2BD07681A32792000F67AB5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = B2BD07661A32792000F67AB5 /* LaunchScreen.xib */; };
-		B2BD07741A32792100F67AB5 /* pathagonTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD07731A32792100F67AB5 /* pathagonTests.m */; };
 		B2BD077F1A32798700F67AB5 /* Board.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD077E1A32798700F67AB5 /* Board.m */; };
 		BB2ED577DB48F45D7B967575 /* AIPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */; };
 		BB2ED68DC1A4F05E71522F80 /* BoardView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2ED81E763D59575399E3CC /* BoardView.m */; };
@@ -32,6 +33,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0C5E31066FA6CA3B7CF402C2 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		0E332AF1DA1AEF54A602BA85 /* Pods-pathagonTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pathagonTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-pathagonTests/Pods-pathagonTests.release.xcconfig"; sourceTree = "<group>"; };
+		9ED8D4B326F5013080722552 /* libPods-pathagonTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pathagonTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB553EEC6157167E00B24519 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD3DA14E445D1D7C9CD23012 /* Pods-pathagonTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pathagonTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-pathagonTests/Pods-pathagonTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B26493DF1A34703F00EC866B /* BoardStructsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BoardStructsTests.m; sourceTree = "<group>"; };
+		B2935B031A35108200F41358 /* BoardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BoardTests.m; sourceTree = "<group>"; };
 		B2BD07541A32792000F67AB5 /* pathagon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pathagon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2BD07581A32792000F67AB5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2BD07591A32792000F67AB5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -44,9 +52,9 @@
 		B2BD07671A32792000F67AB5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		B2BD076D1A32792100F67AB5 /* pathagonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = pathagonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2BD07721A32792100F67AB5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B2BD07731A32792100F67AB5 /* pathagonTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = pathagonTests.m; sourceTree = "<group>"; };
 		B2BD077D1A32798700F67AB5 /* Board.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Board.h; path = Classes/Board.h; sourceTree = "<group>"; };
 		B2BD077E1A32798700F67AB5 /* Board.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Board.m; path = Classes/Board.m; sourceTree = "<group>"; };
+		B7CCBC77C0CB81733FDBF32C /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		BB2ED01634E0D85A63E202D0 /* BoardStructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoardStructs.h; path = Classes/BoardStructs.h; sourceTree = "<group>"; };
 		BB2ED7458420379B774CA308 /* BoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoardView.h; path = Classes/BoardView.h; sourceTree = "<group>"; };
 		BB2ED81E763D59575399E3CC /* BoardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BoardView.m; path = Classes/BoardView.m; sourceTree = "<group>"; };
@@ -76,12 +84,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8E6A77C46B7C9492AF8F115C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AB553EEC6157167E00B24519 /* libPods.a */,
+				9ED8D4B326F5013080722552 /* libPods-pathagonTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9B0FE0D65700DD28A36D4488 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0C5E31066FA6CA3B7CF402C2 /* Pods.debug.xcconfig */,
+				B7CCBC77C0CB81733FDBF32C /* Pods.release.xcconfig */,
+				AD3DA14E445D1D7C9CD23012 /* Pods-pathagonTests.debug.xcconfig */,
+				0E332AF1DA1AEF54A602BA85 /* Pods-pathagonTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		B2BD074B1A32792000F67AB5 = {
 			isa = PBXGroup;
 			children = (
 				B2BD07561A32792000F67AB5 /* pathagon */,
 				B2BD07701A32792100F67AB5 /* pathagonTests */,
 				B2BD07551A32792000F67AB5 /* Products */,
+				9B0FE0D65700DD28A36D4488 /* Pods */,
+				8E6A77C46B7C9492AF8F115C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -132,8 +162,9 @@
 		B2BD07701A32792100F67AB5 /* pathagonTests */ = {
 			isa = PBXGroup;
 			children = (
-				B2BD07731A32792100F67AB5 /* pathagonTests.m */,
 				B2BD07711A32792100F67AB5 /* Supporting Files */,
+				B26493DF1A34703F00EC866B /* BoardStructsTests.m */,
+				B2935B031A35108200F41358 /* BoardTests.m */,
 			);
 			path = pathagonTests;
 			sourceTree = "<group>";
@@ -261,7 +292,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2BD07741A32792100F67AB5 /* pathagonTests.m in Sources */,
+				B2935B041A35108200F41358 /* BoardTests.m in Sources */,
+				B26493E01A34703F00EC866B /* BoardStructsTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,7 +430,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -417,7 +449,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = pathagonTests/Info.plist;
@@ -446,6 +478,7 @@
 				B2BD07791A32792100F67AB5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B2BD077A1A32792100F67AB5 /* Build configuration list for PBXNativeTarget "pathagonTests" */ = {
 			isa = XCConfigurationList;
@@ -454,6 +487,7 @@
 				B2BD077C1A32792100F67AB5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

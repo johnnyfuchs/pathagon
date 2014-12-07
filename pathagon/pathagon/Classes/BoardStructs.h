@@ -29,18 +29,6 @@ struct Piece {
 };
 typedef struct Piece Piece;
 
-struct PieceList {
-    Piece pieces[boardArea];
-    int count;
-};
-typedef struct PieceList PieceList;
-
-static inline PieceList PieceListMake() {
-    PieceList pieceList;
-    pieceList.count = 0;
-    memset(pieceList.pieces, 0, sizeof(pieceList.pieces));
-    return pieceList;
-}
 
 static inline Position PositionMake(int x, int y){
     Position pos; pos.x = x; pos.y = y; return pos;
@@ -60,7 +48,7 @@ static inline Position AddPositions(Position a, Position b) {
     return PositionMake(a.x + b.x, a.y + b.y);
 }
 
-static inline uint64_t IntPosition(Position pos) {
+static inline uint64_t IntFromPosition(Position pos) {
     return (uint64_t)1 << (uint64_t)(pos.x * boardSize + pos.y);
 }
 
@@ -91,17 +79,37 @@ static inline BOOL PiecesEqual(Piece a, Piece b){
     return a.player == b.player && PositionsEqual(a.position, b.position);
 }
 
-static inline void PieceListAddPiece(PieceList * list, Piece piece){
-    assert(list->count < boardArea);
+/**
+* Piece List
+*/
+struct PieceList {
+    Piece pieces[boardArea];
+    uint count;
+    uint next;
+};
+typedef struct PieceList PieceList;
+
+static inline PieceList PieceListMake() {
+    PieceList list;
+    list.count = 0;
+    list.next = 0;
+    memset(list.pieces, 0, sizeof(list.pieces));
+    return list;
+}
+
+static inline void PieceListAppend(PieceList *list, Piece piece){
     list->pieces[list->count] = piece;
     list->count += 1;
 }
 
-static inline Piece PieceListLastPiece(PieceList * list){
-    assert(list->count > 0);
-    return list->pieces[list->count - 1];
+static inline Piece PieceListNextPiece(PieceList * list){
+    assert(list->count);
+    Piece piece = list->pieces[list->next];
+    list->next += 1;
+    list->count -= 1;
+    return piece;
 }
 
-static inline BOOL isPieceListEmpty(PieceList *list){
-    return (BOOL) list->count;
+static inline BOOL PieceListIsEmpty(PieceList *list){
+    return (BOOL) list->count == 0;
 }

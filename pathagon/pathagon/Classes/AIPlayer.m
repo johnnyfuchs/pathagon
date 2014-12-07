@@ -72,9 +72,9 @@ int alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BO
 
 - (Piece) idealPiece:(Board *)board {
     int bestScore = 0;
-    Piece piece;
+    Piece piece = MakePiece(board.currentPlayer, PositionMake(arc4random_uniform(boardSize), arc4random_uniform(boardSize)));
     for(Board *child in board.childBoards){
-        int alpha = alphabeta(child, 2, NSIntegerMin, NSIntegerMax, YES);
+        int alpha = alphabeta(child, 5, NSIntegerMin, NSIntegerMax, YES);
         if(alpha > bestScore){
             bestScore = alpha;
             piece = board.lastPiece;
