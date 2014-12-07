@@ -13,6 +13,29 @@ static const int piecesPerPlayer = 7;
 
 static const Player startingPlayer = White;
 
-@interface Board : NSObject
+@interface Board : NSObject <NSCopying>
 @property (nonatomic, readonly) Piece lastPiece;
+
+- (Player)currentPlayer;
+
+- (void)add:(Piece)piece;
+
+- (void)move:(Piece)piece to:(Position)position;
+
+- (PieceList)removedPieces;
+
+- (Piece)pieceAt:(Position)pos;
+
+- (void)highlight:(Position)position;
+
+- (Piece)highlightedPiece;
+
+- (NSInteger)piecesLeftForPlayer:(Player)player;
+
+- (BOOL)winExistsForPlayer:(Player)player;
+
+- (NSArray *)childBoards;
+
+- (BOOL)canPlay:(Piece)piece;
+
 @end

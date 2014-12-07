@@ -16,7 +16,7 @@ static bool NodeLessThan(struct CBOQNode n1, struct CBOQNode n2) {
     if (n1.val != n2.val)
         return n1.val > n2.val;
     else
-        return (unsigned) n1.obj < (unsigned) n2.obj;
+        return (unsigned long) n1.obj < (unsigned long) n2.obj;
 }
 
 @implementation OrderedQueue

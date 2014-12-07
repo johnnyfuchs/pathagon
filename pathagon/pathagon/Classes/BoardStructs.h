@@ -8,48 +8,56 @@
 static const int boardSize = 7;
 static const int boardArea = boardSize * 2;
 
-NS_ENUM(NSInteger , Direction){
+enum Direction {
     N, S, E, W,
 };
-
 typedef enum Direction Direction;
 
-NS_ENUM(NSInteger , Player){
+enum Player {
     NotAPlayer, White, Black,
 };
 typedef enum Player Player;
 
-typedef struct {
+struct Position {
     int x, y;
-} Position;
+};
+typedef struct Position Position;
 
-typedef struct {
+struct Piece {
     Player player;
     Position position;
-} Piece;
+};
+typedef struct Piece Piece;
 
-
-typedef struct {
+struct PieceList {
     Piece pieces[boardArea];
     int count;
-} PieceList;
+};
+typedef struct PieceList PieceList;
 
-static inline Position MakePosition(int x, int y){
+static inline PieceList PieceListMake() {
+    PieceList pieceList;
+    pieceList.count = 0;
+    memset(pieceList.pieces, 0, sizeof(pieceList.pieces));
+    return pieceList;
+}
+
+static inline Position PositionMake(int x, int y){
     Position pos; pos.x = x; pos.y = y; return pos;
 }
 
 static inline Position PositionForDirection(Direction direction) {
     switch (direction){
-        case N: return MakePosition(0, -1);
-        case S: return MakePosition(0, 1);
-        case E: return MakePosition(1, 0);
-        case W: return MakePosition(-1, 0);
+        case N: return PositionMake(0, -1);
+        case S: return PositionMake(0, 1);
+        case E: return PositionMake(1, 0);
+        case W: return PositionMake(-1, 0);
     }
-    return MakePosition(0, 0);
+    return PositionMake(0, 0);
 }
 
 static inline Position AddPositions(Position a, Position b) {
-    return MakePosition(a.x + b.x, a.y + b.y);
+    return PositionMake(a.x + b.x, a.y + b.y);
 }
 
 static inline uint64_t IntPosition(Position pos) {
@@ -60,7 +68,7 @@ static inline Position PositionFromInt(uint64_t intPos){
     int base = (int) log2(intPos);
     int y = base % boardSize;
     int x = (base - y) / boardSize;
-    return MakePosition(x, y);
+    return PositionMake(x, y);
 }
 
 static inline Player OtherPlayer(Player player) {
@@ -86,11 +94,12 @@ static inline BOOL PiecesEqual(Piece a, Piece b){
 static inline void PieceListAddPiece(PieceList * list, Piece piece){
     assert(list->count < boardArea);
     list->pieces[list->count] = piece;
-    list->count++;
+    list->count += 1;
 }
 
 static inline Piece PieceListLastPiece(PieceList * list){
-    return list->pieces[list->count];
+    assert(list->count > 0);
+    return list->pieces[list->count - 1];
 }
 
 static inline BOOL isPieceListEmpty(PieceList *list){

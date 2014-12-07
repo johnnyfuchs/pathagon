@@ -15,6 +15,8 @@
 		B2BD07681A32792000F67AB5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = B2BD07661A32792000F67AB5 /* LaunchScreen.xib */; };
 		B2BD07741A32792100F67AB5 /* pathagonTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD07731A32792100F67AB5 /* pathagonTests.m */; };
 		B2BD077F1A32798700F67AB5 /* Board.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD077E1A32798700F67AB5 /* Board.m */; };
+		BB2ED577DB48F45D7B967575 /* AIPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */; };
+		BB2ED68DC1A4F05E71522F80 /* BoardView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2ED81E763D59575399E3CC /* BoardView.m */; };
 		BB2EDB1F6229D59FF2C0D350 /* NSValue+Piece.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2EDD6B2520BA7D97B0497F /* NSValue+Piece.m */; };
 		BB2EDD5340A9803B0FFA276A /* OrderedQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB2ED873BFD2FE2072F4EE92 /* OrderedQueue.mm */; };
 /* End PBXBuildFile section */
@@ -46,9 +48,13 @@
 		B2BD077D1A32798700F67AB5 /* Board.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Board.h; path = Classes/Board.h; sourceTree = "<group>"; };
 		B2BD077E1A32798700F67AB5 /* Board.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Board.m; path = Classes/Board.m; sourceTree = "<group>"; };
 		BB2ED01634E0D85A63E202D0 /* BoardStructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoardStructs.h; path = Classes/BoardStructs.h; sourceTree = "<group>"; };
+		BB2ED7458420379B774CA308 /* BoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoardView.h; path = Classes/BoardView.h; sourceTree = "<group>"; };
+		BB2ED81E763D59575399E3CC /* BoardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BoardView.m; path = Classes/BoardView.m; sourceTree = "<group>"; };
 		BB2ED873BFD2FE2072F4EE92 /* OrderedQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OrderedQueue.mm; path = Classes/OrderedQueue.mm; sourceTree = "<group>"; };
 		BB2ED9DB3C4BFB8177361782 /* OrderedQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrderedQueue.h; path = Classes/OrderedQueue.h; sourceTree = "<group>"; };
+		BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AIPlayer.m; path = Classes/AIPlayer.m; sourceTree = "<group>"; };
 		BB2EDD6B2520BA7D97B0497F /* NSValue+Piece.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSValue+Piece.m"; path = "Categories/NSValue+Piece.m"; sourceTree = "<group>"; };
+		BB2EDE6A3960DD15933910C1 /* AIPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIPlayer.h; path = Classes/AIPlayer.h; sourceTree = "<group>"; };
 		BB2EDF9800C33EFA6AB603A0 /* NSValue+Piece.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSValue+Piece.h"; path = "Categories/NSValue+Piece.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -106,6 +112,10 @@
 				BB2EDD6B2520BA7D97B0497F /* NSValue+Piece.m */,
 				BB2EDF9800C33EFA6AB603A0 /* NSValue+Piece.h */,
 				BB2ED01634E0D85A63E202D0 /* BoardStructs.h */,
+				BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */,
+				BB2EDE6A3960DD15933910C1 /* AIPlayer.h */,
+				BB2ED81E763D59575399E3CC /* BoardView.m */,
+				BB2ED7458420379B774CA308 /* BoardView.h */,
 			);
 			path = pathagon;
 			sourceTree = "<group>";
@@ -242,6 +252,8 @@
 				B2BD075A1A32792000F67AB5 /* main.m in Sources */,
 				BB2EDD5340A9803B0FFA276A /* OrderedQueue.mm in Sources */,
 				BB2EDB1F6229D59FF2C0D350 /* NSValue+Piece.m in Sources */,
+				BB2ED577DB48F45D7B967575 /* AIPlayer.m in Sources */,
+				BB2ED68DC1A4F05E71522F80 /* BoardView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
