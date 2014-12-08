@@ -6,7 +6,7 @@
 #import <Foundation/Foundation.h>
 
 static const int boardSize = 7;
-static const int boardArea = boardSize * 2;
+static const int boardArea = boardSize * boardSize;
 
 enum Direction {
     N, S, E, W,

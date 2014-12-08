@@ -7,8 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B250DA261A35705A00866F54 /* AIPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = B250DA251A35705A00866F54 /* AIPlayer.m */; };
 		B26493E01A34703F00EC866B /* BoardStructsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B26493DF1A34703F00EC866B /* BoardStructsTests.m */; };
 		B2935B041A35108200F41358 /* BoardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2935B031A35108200F41358 /* BoardTests.m */; };
+		B2935B061A3520BC00F41358 /* AIPlayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2935B051A3520BC00F41358 /* AIPlayerTests.m */; };
+		B2935B091A3530C300F41358 /* PriorityQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = B2935B081A3530C300F41358 /* PriorityQueue.m */; };
+		B2935B0B1A35383900F41358 /* PriorityQueueTest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2935B0A1A35383900F41358 /* PriorityQueueTest.m */; };
 		B2BD075A1A32792000F67AB5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD07591A32792000F67AB5 /* main.m */; };
 		B2BD075D1A32792000F67AB5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD075C1A32792000F67AB5 /* AppDelegate.m */; };
 		B2BD07601A32792000F67AB5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD075F1A32792000F67AB5 /* ViewController.m */; };
@@ -16,7 +20,6 @@
 		B2BD07651A32792000F67AB5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2BD07641A32792000F67AB5 /* Images.xcassets */; };
 		B2BD07681A32792000F67AB5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = B2BD07661A32792000F67AB5 /* LaunchScreen.xib */; };
 		B2BD077F1A32798700F67AB5 /* Board.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BD077E1A32798700F67AB5 /* Board.m */; };
-		BB2ED577DB48F45D7B967575 /* AIPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */; };
 		BB2ED68DC1A4F05E71522F80 /* BoardView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2ED81E763D59575399E3CC /* BoardView.m */; };
 		BB2EDB1F6229D59FF2C0D350 /* NSValue+Piece.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2EDD6B2520BA7D97B0497F /* NSValue+Piece.m */; };
 		BB2EDD5340A9803B0FFA276A /* OrderedQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB2ED873BFD2FE2072F4EE92 /* OrderedQueue.mm */; };
@@ -38,8 +41,14 @@
 		9ED8D4B326F5013080722552 /* libPods-pathagonTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pathagonTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB553EEC6157167E00B24519 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD3DA14E445D1D7C9CD23012 /* Pods-pathagonTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pathagonTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-pathagonTests/Pods-pathagonTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B250DA241A35705A00866F54 /* AIPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIPlayer.h; path = Classes/AIPlayer.h; sourceTree = "<group>"; };
+		B250DA251A35705A00866F54 /* AIPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AIPlayer.m; path = Classes/AIPlayer.m; sourceTree = "<group>"; };
 		B26493DF1A34703F00EC866B /* BoardStructsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BoardStructsTests.m; sourceTree = "<group>"; };
 		B2935B031A35108200F41358 /* BoardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BoardTests.m; sourceTree = "<group>"; };
+		B2935B051A3520BC00F41358 /* AIPlayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AIPlayerTests.m; sourceTree = "<group>"; };
+		B2935B071A3530C300F41358 /* PriorityQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PriorityQueue.h; sourceTree = "<group>"; };
+		B2935B081A3530C300F41358 /* PriorityQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PriorityQueue.m; sourceTree = "<group>"; };
+		B2935B0A1A35383900F41358 /* PriorityQueueTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PriorityQueueTest.m; sourceTree = "<group>"; };
 		B2BD07541A32792000F67AB5 /* pathagon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pathagon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2BD07581A32792000F67AB5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2BD07591A32792000F67AB5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -60,9 +69,7 @@
 		BB2ED81E763D59575399E3CC /* BoardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BoardView.m; path = Classes/BoardView.m; sourceTree = "<group>"; };
 		BB2ED873BFD2FE2072F4EE92 /* OrderedQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OrderedQueue.mm; path = Classes/OrderedQueue.mm; sourceTree = "<group>"; };
 		BB2ED9DB3C4BFB8177361782 /* OrderedQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrderedQueue.h; path = Classes/OrderedQueue.h; sourceTree = "<group>"; };
-		BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AIPlayer.m; path = Classes/AIPlayer.m; sourceTree = "<group>"; };
 		BB2EDD6B2520BA7D97B0497F /* NSValue+Piece.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSValue+Piece.m"; path = "Categories/NSValue+Piece.m"; sourceTree = "<group>"; };
-		BB2EDE6A3960DD15933910C1 /* AIPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIPlayer.h; path = Classes/AIPlayer.h; sourceTree = "<group>"; };
 		BB2EDF9800C33EFA6AB603A0 /* NSValue+Piece.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSValue+Piece.h"; path = "Categories/NSValue+Piece.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -127,12 +134,16 @@
 		B2BD07561A32792000F67AB5 /* pathagon */ = {
 			isa = PBXGroup;
 			children = (
+				B250DA241A35705A00866F54 /* AIPlayer.h */,
+				B250DA251A35705A00866F54 /* AIPlayer.m */,
 				B2BD075B1A32792000F67AB5 /* AppDelegate.h */,
 				B2BD075C1A32792000F67AB5 /* AppDelegate.m */,
 				B2BD077D1A32798700F67AB5 /* Board.h */,
 				B2BD077E1A32798700F67AB5 /* Board.m */,
 				B2BD075E1A32792000F67AB5 /* ViewController.h */,
 				B2BD075F1A32792000F67AB5 /* ViewController.m */,
+				B2935B071A3530C300F41358 /* PriorityQueue.h */,
+				B2935B081A3530C300F41358 /* PriorityQueue.m */,
 				B2BD07611A32792000F67AB5 /* Main.storyboard */,
 				B2BD07641A32792000F67AB5 /* Images.xcassets */,
 				B2BD07661A32792000F67AB5 /* LaunchScreen.xib */,
@@ -142,8 +153,6 @@
 				BB2EDD6B2520BA7D97B0497F /* NSValue+Piece.m */,
 				BB2EDF9800C33EFA6AB603A0 /* NSValue+Piece.h */,
 				BB2ED01634E0D85A63E202D0 /* BoardStructs.h */,
-				BB2EDA28A1376C7BED0C86A1 /* AIPlayer.m */,
-				BB2EDE6A3960DD15933910C1 /* AIPlayer.h */,
 				BB2ED81E763D59575399E3CC /* BoardView.m */,
 				BB2ED7458420379B774CA308 /* BoardView.h */,
 			);
@@ -165,6 +174,8 @@
 				B2BD07711A32792100F67AB5 /* Supporting Files */,
 				B26493DF1A34703F00EC866B /* BoardStructsTests.m */,
 				B2935B031A35108200F41358 /* BoardTests.m */,
+				B2935B0A1A35383900F41358 /* PriorityQueueTest.m */,
+				B2935B051A3520BC00F41358 /* AIPlayerTests.m */,
 			);
 			path = pathagonTests;
 			sourceTree = "<group>";
@@ -280,10 +291,11 @@
 				B2BD077F1A32798700F67AB5 /* Board.m in Sources */,
 				B2BD07601A32792000F67AB5 /* ViewController.m in Sources */,
 				B2BD075D1A32792000F67AB5 /* AppDelegate.m in Sources */,
+				B250DA261A35705A00866F54 /* AIPlayer.m in Sources */,
 				B2BD075A1A32792000F67AB5 /* main.m in Sources */,
 				BB2EDD5340A9803B0FFA276A /* OrderedQueue.mm in Sources */,
 				BB2EDB1F6229D59FF2C0D350 /* NSValue+Piece.m in Sources */,
-				BB2ED577DB48F45D7B967575 /* AIPlayer.m in Sources */,
+				B2935B091A3530C300F41358 /* PriorityQueue.m in Sources */,
 				BB2ED68DC1A4F05E71522F80 /* BoardView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -292,6 +304,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2935B061A3520BC00F41358 /* AIPlayerTests.m in Sources */,
+				B2935B0B1A35383900F41358 /* PriorityQueueTest.m in Sources */,
 				B2935B041A35108200F41358 /* BoardTests.m in Sources */,
 				B26493E01A34703F00EC866B /* BoardStructsTests.m in Sources */,
 			);

@@ -42,4 +42,6 @@ static const Player startingPlayer = White;
 
 - (PieceList)piecesTrappedBy:(Piece)piece;
 
+- (PieceList) playablePieces;
+
 @end

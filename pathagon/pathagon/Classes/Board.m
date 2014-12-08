@@ -7,7 +7,7 @@
 //
 
 #import "Board.h"
-#import "OrderedQueue.h"
+#import "PriorityQueue.h"
 #import "NSValue+Piece.h"
 #import "BoardStructs.h"
 
@@ -122,20 +122,31 @@ static inline int PathHeuristic(Position a, Position b){
 
 - (PieceList) playablePieces {
     Player player = self.currentPlayer;
-    PieceList playable = PieceListMake();
-    for (int x=0; x<boardSize-1; x++){
-        for(int y=0; y<boardSize-1; y++){
-            Position pos = PositionMake(x, y);
-            uint64_t intPos = IntFromPosition(pos);
-            if(     !( intPos & _black
-                    || intPos & _white
-                    || intPos & _blackRemoved
-                    || intPos & _whiteRemoved)){
-                PieceListAppend(&playable, MakePiece(player, pos));
+    PieceList list = PieceListMake();
+    uint64_t intPiece;
+    uint64_t intPieceRemoved;
+    uint64_t intPos;
+    Position pos;
+
+    for (int x=0; x<boardSize; x++){
+        for(int y=0; y<boardSize; y++){
+            pos = PositionMake(x, y);
+            intPos = IntFromPosition(pos);
+
+            if(player == White){
+                intPiece = _white;
+                intPieceRemoved = _whiteRemoved;
+            } else {
+                intPiece = _black;
+                intPieceRemoved = _blackRemoved;
+            }
+            if(!( intPos & intPiece || intPos & intPieceRemoved)){
+                Piece piece = MakePiece(player, pos);
+                PieceListAppend(&list, piece);
             }
         }
     }
-    return playable;
+    return list;
 }
 
 - (PieceList) allPieces {
@@ -160,50 +171,51 @@ static inline int PathHeuristic(Position a, Position b){
     for(int i=0; i<4; i++){
         Piece match = [self pieceAt:AddPositions(piece.position, PositionForDirection(directions[i]))];
         if(isPiece(match) && piece.player == match.player){
-            PieceListAppend(&all, piece);
+            PieceListAppend(&all, match);
         }
     }
     return all;
 }
 
 - (BOOL) pathExistsFrom:(Piece) start to:(Piece) finish {
-    OrderedQueue *frontier = [[OrderedQueue alloc] init];
-    [frontier addObject:[NSValue valueWithPiece:start] value:0];
+    PriorityQueue *frontier = [[PriorityQueue alloc] init];
+    [frontier add:[NSValue valueWithPiece:start] priority:0];
     NSMutableDictionary *costs = [NSMutableDictionary new];
+    NSMutableDictionary *path = [NSMutableDictionary new];
 
     while (frontier.count){
+        
         Piece currentPiece = ((NSValue *)frontier.pop).pieceValue;
         NSValue *currentPieceValue = [NSValue valueWithPiece:currentPiece];
-
         if(PiecesEqual(currentPiece, finish)){
             return YES;
         }
 
         PieceList neighbors = [self connectedPieces:currentPiece];
-
-        for(int idx=0; idx <neighbors.count; idx++){
-            Piece neighbor = neighbors.pieces[idx];
-
+        while (!PieceListIsEmpty(&neighbors)) {
+            
+            Piece neighbor = PieceListNextPiece(&neighbors);
             uint newCost = [costs[currentPieceValue] unsignedIntValue] + PathHeuristic(neighbor.position, finish.position);
-
             NSValue *neighborValue = [NSValue valueWithPiece:neighbor];
             NSNumber *neighborCost = costs[neighborValue];
-
+            
             if(!neighborCost || newCost < neighborCost.integerValue ){
-                costs[neighborValue] = @(newCost);
+                
                 uint priority = newCost + PathHeuristic(neighbor.position, finish.position);
-                [frontier addObject:neighborValue value:priority];
+                costs[neighborValue] = @(newCost);
+                path[neighborValue] = currentPieceValue;
+                [frontier add:neighborValue priority:priority];
             }
         }
     }
-    return false;
+    return NO;
 }
 
 -(NSInteger) piecesLeftForPlayer:(Player)player {
-    int played = 0;
+    NSInteger played = 0;
     PieceList all = [self allPieces];
-    for(int i=0; i<all.count; i++){
-        Piece piece = all.pieces[i];
+    while (!PieceListIsEmpty(&all)) {
+        Piece piece = PieceListNextPiece(&all);
         if (piece.player == player){
             played++;
         }
@@ -235,9 +247,6 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 -(BOOL) winExistsForPlayer:(Player)player {
-    if([self piecesLeftForPlayer:player] < boardSize){
-        return false;
-    }
 
     int lastRow = boardSize - 1;
     PieceList startNodes = player == White ? [self piecesInRow:0 player:player] : [self piecesInCol:0 player:player];
@@ -295,11 +304,15 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (NSString *)description {
-    NSString *bar = @"------------------";
-    NSMutableString *o = [bar mutableCopy];
+
+    NSMutableString *o = [NSMutableString new];
+    NSString *bar = @"-------";
     [o appendString:@"\n"];
-    for (int x=0; x<boardSize-1; x++){
-        for(int y=0; y<boardSize-1; y++) {
+    [o appendString:bar];
+    [o appendString:@"\n"];
+    for (int y=0; y<boardSize; y++){
+        [o appendString:@"|"];
+        for(int x=0; x<boardSize; x++) {
             Position pos = PositionMake(x, y);
             Piece piece = [self pieceAt:pos];
             if(isPiece(piece)){
@@ -308,7 +321,7 @@ static inline int PathHeuristic(Position a, Position b){
                 [o appendString:@" "];
             }
         }
-        [o appendString:@"\n"];
+        [o appendString:@"|\n"];
     }
     [o appendString:bar];
     return o;

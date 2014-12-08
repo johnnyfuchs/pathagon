@@ -15,4 +15,5 @@
 {
     Piece piece; [self getValue:&piece]; return piece;
 }
+
 @end

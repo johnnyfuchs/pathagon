@@ -8,13 +8,12 @@
 #import "BoardStructs.h"
 
 
-int heuristic(Board *board) {
+NSInteger heuristic(Board *board) {
     if(!isPiece(board.lastPiece)) {
-        return arc4random_uniform(10) - 10;
+        return arc4random_uniform(10);
     }
 
     Piece lastPiece = board.lastPiece;
-    Player otherPlayer = OtherPlayer(lastPiece.player);
 
     if([board winExistsForPlayer:lastPiece.player]){
         return 99999;
@@ -36,7 +35,7 @@ int heuristic(Board *board) {
     return touching;
 }
 
-int alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing){
+NSInteger alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing){
     if(!depth){
         return heuristic(board);
     }
@@ -71,16 +70,21 @@ int alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BO
 }
 
 - (Piece) idealPiece:(Board *)board {
-    int bestScore = 0;
+    NSInteger bestScore = 0;
     Piece piece = MakePiece(board.currentPlayer, PositionMake(arc4random_uniform(boardSize), arc4random_uniform(boardSize)));
     for(Board *child in board.childBoards){
-        int alpha = alphabeta(child, 5, NSIntegerMin, NSIntegerMax, YES);
+        NSInteger alpha = alphabeta(child, 4, NSIntegerMin, NSIntegerMax, YES);
         if(alpha > bestScore){
             bestScore = alpha;
             piece = board.lastPiece;
         }
     }
     return piece;
+}
+
+- (Piece) randomPiece:(Board *)board {
+    NSArray *children = board.childBoards;
+    return ((Board *)children[(NSUInteger)arc4random_uniform((uint)children.count)]).lastPiece;
 }
 
 @end

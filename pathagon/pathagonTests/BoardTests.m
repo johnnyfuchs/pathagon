@@ -9,6 +9,11 @@
 #import <XCTest/XCTest.h>
 #import "Board.h"
 
+@interface Board (Tests)
+- (BOOL) pathExistsFrom:(Piece) start to:(Piece) finish;
+- (PieceList)connectedPieces:(Piece)piece;
+@end
+
 @interface BoardTests : XCTestCase
 
 @end
@@ -50,5 +55,67 @@
     XCTAssertEqual(loops, 4);
 }
 
+
+- (void) testPlayablePieces {
+    Board *board = [Board new];
+    PieceList list = [board playablePieces];
+    XCTAssertEqual(list.count, boardArea);
+}
+
+- (void) testConnectedPieces {
+    Board * board = [Board new];
+    [board add:MakePiece(Black, PositionMake(1, 2))];
+    [board add:MakePiece(Black, PositionMake(2, 1))];
+    [board add:MakePiece(Black, PositionMake(2, 3))];
+    [board add:MakePiece(Black, PositionMake(3, 2))];
+    
+    PieceList list = [board connectedPieces:MakePiece(Black, PositionMake(2, 2))];
+    
+    XCTAssertEqual(list.count, 4);
+}
+
+- (void) testConnectedPiecesPartial {
+    Board * board = [Board new];
+    [board add:MakePiece(Black, PositionMake(2, 2))];
+    [board add:MakePiece(Black, PositionMake(3, 1))];
+    [board add:MakePiece(Black, PositionMake(4, 2))];
+    
+    PieceList list = [board connectedPieces:MakePiece(Black, PositionMake(3, 2))];
+    
+    XCTAssertEqual(list.count, 3);
+}
+
+- (void) testConnectedPiecesExtraPiece {
+    Board * board = [Board new];
+    [board add:MakePiece(Black, PositionMake(2, 2))];
+    [board add:MakePiece(Black, PositionMake(3, 6))];
+    [board add:MakePiece(Black, PositionMake(4, 2))];
+    
+    PieceList list = [board connectedPieces:MakePiece(Black, PositionMake(3, 2))];
+    
+    XCTAssertEqual(list.count, 2);
+}
+
+-(void) testAdjacentPath {
+    Board *board = [Board new];
+    Piece start = MakePiece(White, PositionMake(3, 0));
+    Piece to = MakePiece(White, PositionMake(3, 1));
+    [board add:start];
+    [board add:to];
+    XCTAssert([board pathExistsFrom:start to:to]);
+}
+
+-(void) testPathExists {
+    Board *board = [Board new];
+    Piece start = MakePiece(White, PositionMake(3, 0));
+    Piece to = MakePiece(White, PositionMake(3, boardSize - 1));
+    
+    for(int row=0;row<boardSize; row++){
+        [board add:MakePiece(White, PositionMake(3, row))];
+    }
+    
+    XCTAssert([board pathExistsFrom:start to:to]);
+
+}
 
 @end
