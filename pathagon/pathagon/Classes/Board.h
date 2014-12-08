@@ -14,6 +14,7 @@ static const int piecesPerPlayer = 7;
 static const Player startingPlayer = White;
 
 @interface Board : NSObject <NSCopying>
+@property (nonatomic, copy) void (^onWin)(Player player);
 @property (nonatomic, readonly) Piece lastPiece;
 
 - (Player)currentPlayer;

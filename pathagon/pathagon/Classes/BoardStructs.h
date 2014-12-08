@@ -67,6 +67,11 @@ static inline BOOL isPiece(Piece piece){
     return piece.player != NotAPlayer;
 }
 
+static inline NSString *NSStringFromPiece(Piece piece) {
+    NSString *player = piece.player == NotAPlayer ? @"NotAPlayer" : piece.player == White ? @"White" : @"Black";
+    return [NSString stringWithFormat:@"piece p: %@ (x: %i, y:%i)", player, piece.position.x, piece.position.y];
+}
+
 static inline Piece MakePiece(Player player, Position position){
     Piece piece; piece.player = player; piece.position = position; return piece;
 }

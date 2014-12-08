@@ -8,9 +8,9 @@
 #import "BoardStructs.h"
 
 
-NSInteger heuristic(Board *board) {
+NSInteger BoardHeuristic(Board *board) {
     if(!isPiece(board.lastPiece)) {
-        return arc4random_uniform(10);
+        return 0;
     }
 
     Piece lastPiece = board.lastPiece;
@@ -21,7 +21,7 @@ NSInteger heuristic(Board *board) {
 
     PieceList removed = [board removedPieces];
     if(removed.count){
-        return removed.count * 10;
+        return removed.count * 100;
     }
 
     Direction directions[4] = {N, S, E, W};
@@ -36,55 +36,75 @@ NSInteger heuristic(Board *board) {
 }
 
 NSInteger alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing){
+    NSInteger value = 0;
     if(!depth){
-        return heuristic(board);
-    }
-
-    if(maxing){
+        value = BoardHeuristic(board);
+    } else if(maxing){
         NSArray *children = board.childBoards;
         for(Board *child in children){
-            alpha = MAX(alpha, alphabeta(child, depth - 1, alpha, beta, NO));
+            NSInteger newAlpha = alphabeta(child, depth - 1, alpha, beta, NO);
+            alpha = MAX(alpha, newAlpha);
             if(beta <= alpha){
                 break;
             }
         }
-        return alpha;
+        value = alpha;
     } else {
         NSArray *children = board.childBoards;
         for(Board *child in children){
-            beta = MIN(beta, alphabeta(child, depth - 1, alpha, beta, NO));
+            NSInteger newBeta = alphabeta(child, depth - 1, alpha, beta, YES);
+            beta = MIN(beta, newBeta);
             if(beta <= alpha){
                 break;
             }
         }
-        return beta;
+        value = beta;
     }
+    return value;
 }
 
 
-@implementation AIPlayer
+@implementation AIPlayer {
+    NSTimeInterval _endThinking;
+    NSTimeInterval _startThinking;
+}
 
 - (void)takeTurn:(Board *)board {
     Piece piece = [self idealPiece:board];
-    [board add:piece];
+    if([board canPlay:piece]){
+        [board add:piece];
+    }
 }
 
 - (Piece) idealPiece:(Board *)board {
+    _startThinking = [NSDate timeIntervalSinceReferenceDate];
+    _endThinking = 0;
     NSInteger bestScore = 0;
     Piece piece = MakePiece(board.currentPlayer, PositionMake(arc4random_uniform(boardSize), arc4random_uniform(boardSize)));
     for(Board *child in board.childBoards){
-        NSInteger alpha = alphabeta(child, 4, NSIntegerMin, NSIntegerMax, YES);
+        NSInteger alpha = alphabeta(child, 4, -1000000, 10000000, YES);
         if(alpha > bestScore){
             bestScore = alpha;
-            piece = board.lastPiece;
+            piece = child.lastPiece;
         }
     }
+    _endThinking = [NSDate timeIntervalSinceReferenceDate];
     return piece;
 }
 
 - (Piece) randomPiece:(Board *)board {
     NSArray *children = board.childBoards;
     return ((Board *)children[(NSUInteger)arc4random_uniform((uint)children.count)]).lastPiece;
+}
+
+- (NSTimeInterval) thinkingTime {
+    if (!_startThinking) {
+        return 0;
+    }
+    if(!_endThinking){
+        return [NSDate timeIntervalSinceReferenceDate] - _startThinking;
+    }
+    return _endThinking - _startThinking;
 }
 
 @end

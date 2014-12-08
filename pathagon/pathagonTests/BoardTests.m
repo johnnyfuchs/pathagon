@@ -62,6 +62,19 @@
     XCTAssertEqual(list.count, boardArea);
 }
 
+- (void) testPlayablePiecesAlmostFull {
+    Board *board = [Board new];
+    
+    for(int x = 0; x < boardSize; x++){
+        for (int y=1; y < boardSize; y++) {
+            [board add:MakePiece(White, PositionMake(x, y))];
+        }
+    }
+    PieceList list = [board playablePieces];
+    XCTAssertEqual(list.count, 7);
+}
+
+
 - (void) testConnectedPieces {
     Board * board = [Board new];
     [board add:MakePiece(Black, PositionMake(1, 2))];

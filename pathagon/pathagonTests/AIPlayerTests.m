@@ -28,11 +28,7 @@
 
 - (void)testHueristicNoLastPiece {
     Board *b = [Board new];
-    
-    XCTAssertGreaterThanOrEqual(heuristic(b), 0);
-    XCTAssertLessThan(heuristic(b), 10);
-    XCTAssertGreaterThanOrEqual(heuristic(b), 0);
-    XCTAssertLessThan(heuristic(b), 10);
+    XCTAssertEqual(BoardHeuristic(b), 0);
 }
 
 - (void)testHueristicWin {
@@ -42,7 +38,7 @@
         [b add:MakePiece(White, PositionMake(4, row))];
     }
     
-    XCTAssertEqual(heuristic(b), 99999);
+    XCTAssertEqual(BoardHeuristic(b), 99999);
 }
 
 
@@ -59,8 +55,51 @@
     [board add:MakePiece(Black, PositionMake(2, 3))];
     [board add:MakePiece(Black, PositionMake(3, 2))];
     
+    [board add:MakePiece(White, PositionMake(2, 2))];
+    
+    XCTAssertEqual(BoardHeuristic(board), 400);
+}
+
+- (void)testPiecesTouching {
+    
+    Board * board = [Board new];
+    
+    [board add:MakePiece(Black, PositionMake(1, 2))];
+    [board add:MakePiece(Black, PositionMake(2, 1))];
+    [board add:MakePiece(Black, PositionMake(2, 3))];
+    [board add:MakePiece(Black, PositionMake(3, 2))];
+    
     [board add:MakePiece(Black, PositionMake(2, 2))];
     
-    XCTAssertEqual(heuristic(board), 40);
+    XCTAssertEqual(BoardHeuristic(board), 40);
 }
+
+- (void) testChoosesACapture {
+    AIPlayer *ai = [AIPlayer new];
+    Board * board = [Board new];
+    [board add:MakePiece(White, PositionMake(0, 2))];
+    [board add:MakePiece(White, PositionMake(2, 4))];
+    [board add:MakePiece(White, PositionMake(2, 0))];
+    [board add:MakePiece(White, PositionMake(4, 2))];
+    
+    [board add:MakePiece(Black, PositionMake(1, 2))];
+    [board add:MakePiece(Black, PositionMake(2, 1))];
+    [board add:MakePiece(Black, PositionMake(2, 3))];
+    [board add:MakePiece(Black, PositionMake(3, 2))];
+    
+    [ai takeTurn:board];
+    XCTAssert(PiecesEqual(board.lastPiece, MakePiece(White, PositionMake(2, 2))));
+}
+
+- (void) testChoosesAWin {
+    AIPlayer *ai = [AIPlayer new];
+    Board * board = [Board new];
+    for (int x = 0; x < boardSize - 2; x++) {
+        [board add:MakePiece(Black, PositionMake(x, 0))];
+    }
+    [board add:MakePiece(White, PositionMake(1, 1))];
+    [ai takeTurn:board];
+    XCTAssert([board winExistsForPlayer:Black]);
+}
+
 @end

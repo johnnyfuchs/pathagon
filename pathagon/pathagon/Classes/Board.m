@@ -10,6 +10,7 @@
 #import "PriorityQueue.h"
 #import "NSValue+Piece.h"
 #import "BoardStructs.h"
+#import "AIPlayer.h"
 
 static inline int PathHeuristic(Position a, Position b){
     return abs(a.x - b.x) + abs(a.y - b.y);
@@ -123,24 +124,16 @@ static inline int PathHeuristic(Position a, Position b){
 - (PieceList) playablePieces {
     Player player = self.currentPlayer;
     PieceList list = PieceListMake();
-    uint64_t intPiece;
-    uint64_t intPieceRemoved;
-    uint64_t intPos;
+    uint64_t ip;
     Position pos;
+    BOOL open;
 
     for (int x=0; x<boardSize; x++){
         for(int y=0; y<boardSize; y++){
             pos = PositionMake(x, y);
-            intPos = IntFromPosition(pos);
-
-            if(player == White){
-                intPiece = _white;
-                intPieceRemoved = _whiteRemoved;
-            } else {
-                intPiece = _black;
-                intPieceRemoved = _blackRemoved;
-            }
-            if(!( intPos & intPiece || intPos & intPieceRemoved)){
+            ip = IntFromPosition(pos);
+            open = !(_white & ip) && !(_black & ip) && !(_whiteRemoved & ip) && !(_blackRemoved & ip);
+            if(open) {
                 Piece piece = MakePiece(player, pos);
                 PieceListAppend(&list, piece);
             }
@@ -298,7 +291,6 @@ static inline int PathHeuristic(Position a, Position b){
         Board *child = [self copy];
         [child add:PieceListNextPiece(&playablePieces)];
         [boards addObject:child];
-        NSLog(@"%@", child);
     }
     return boards;
 }
@@ -339,13 +331,11 @@ static inline int PathHeuristic(Position a, Position b){
 
 
 - (BOOL)canPlay:(Piece)piece {
-    PieceList playablePieces = [self playablePieces];
-    for(int idx=0; idx < playablePieces.count; idx++){
-        if(PiecesEqual(piece, playablePieces.pieces[idx])){
-            return YES;
-        }
-    }
-    return NO;
+    uint64_t ip;
+    BOOL open;
+    ip = IntFromPosition(piece.position);
+    open = !(_white & ip) && !(_black & ip) && !(_whiteRemoved & ip) && !(_blackRemoved & ip);
+    return open;
 }
 
 @end

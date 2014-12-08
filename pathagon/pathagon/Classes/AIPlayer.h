@@ -7,10 +7,12 @@
 
 @class Board;
 
-NSInteger heuristic(Board *board);
+NSInteger BoardHeuristic(Board *board);
 NSInteger alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing);
 
 @interface AIPlayer : NSObject
+
+@property(nonatomic, readonly) NSTimeInterval thinkingTime;
 
 - (void) takeTurn:(Board *)board;
 
