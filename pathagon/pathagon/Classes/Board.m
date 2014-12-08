@@ -63,18 +63,18 @@ static inline int PathHeuristic(Position a, Position b){
     uint64_t intPiece = IntFromPosition(piece.position);
 
     if(piece.player == White && _white & intPiece) {
-        _white += intPiece;
+        _white -= intPiece;
         _whiteRemoved += intPiece;
     } else if (piece.player == Black && _black & intPiece) {
-        _black += intPiece;
+        _black -= intPiece;
         _blackRemoved += intPiece;
     }
 }
 
 - (PieceList) removedPieces {
     PieceList all = PieceListMake();
-    for (int x=0; x<boardSize-1; x++){
-        for(int y=0; y<boardSize-1; y++){
+    for (int x=0; x<boardSize; x++){
+        for(int y=0; y<boardSize; y++){
             Position pos = PositionMake(x, y);
             uint64_t intPos = IntFromPosition(pos);
             if(intPos & _blackRemoved){
@@ -88,7 +88,7 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (Piece) pieceAt:(Position) pos {
-    if (pos.x < 0 || pos.x > boardSize - 1 || pos.y < 0 || pos.y > boardSize - 1) {
+    if (pos.x < 0 || pos.x >= boardSize || pos.y < 0 || pos.y >= boardSize) {
         return MakePiece(NotAPlayer, PositionMake(0, 0));
     }
     uint64_t intPiece = IntFromPosition(pos);
@@ -144,8 +144,8 @@ static inline int PathHeuristic(Position a, Position b){
 
 - (PieceList) allPieces {
     PieceList all = PieceListMake();
-    for (int x=0; x<boardSize-1; x++){
-        for(int y=0; y<boardSize-1; y++){
+    for (int x=0; x<boardSize; x++){
+        for(int y=0; y<boardSize; y++){
             Position pos = PositionMake(x, y);
             uint64_t intPos = IntFromPosition(pos);
             if(intPos & _black){
@@ -218,8 +218,8 @@ static inline int PathHeuristic(Position a, Position b){
 
 
 - (void)removePieces:(PieceList)list {
-    for(int i=0; i< list.count; i++){
-        [self remove:list.pieces[i]];
+    while(!PieceListIsEmpty(&list)){
+        [self remove:PieceListNextPiece(&list)];
     }
 }
 

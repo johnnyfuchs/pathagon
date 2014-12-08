@@ -8,7 +8,7 @@
 @class Board;
 
 NSInteger BoardHeuristic(Board *board);
-NSInteger alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing);
+NSInteger alphabeta(Board *board, NSInteger depth, BOOL maxing);
 
 @interface AIPlayer : NSObject
 

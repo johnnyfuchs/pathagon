@@ -94,7 +94,7 @@
 - (void) testChoosesAWin {
     AIPlayer *ai = [AIPlayer new];
     Board * board = [Board new];
-    for (int x = 0; x < boardSize - 2; x++) {
+    for (int x = 0; x < boardSize - 1; x++) {
         [board add:MakePiece(Black, PositionMake(x, 0))];
     }
     [board add:MakePiece(White, PositionMake(1, 1))];

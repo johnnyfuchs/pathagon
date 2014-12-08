@@ -35,32 +35,27 @@ NSInteger BoardHeuristic(Board *board) {
     return touching;
 }
 
-NSInteger alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing){
-    NSInteger value = 0;
+NSInteger alphabeta(Board *board, NSInteger depth, BOOL maxing){
+    NSInteger alpha = -100000000;
+    NSInteger beta = 100000000;
     if(!depth){
-        value = BoardHeuristic(board);
-    } else if(maxing){
-        NSArray *children = board.childBoards;
-        for(Board *child in children){
-            NSInteger newAlpha = alphabeta(child, depth - 1, alpha, beta, NO);
-            alpha = MAX(alpha, newAlpha);
-            if(beta <= alpha){
-                break;
-            }
-        }
-        value = alpha;
-    } else {
-        NSArray *children = board.childBoards;
-        for(Board *child in children){
-            NSInteger newBeta = alphabeta(child, depth - 1, alpha, beta, YES);
-            beta = MIN(beta, newBeta);
-            if(beta <= alpha){
-                break;
-            }
-        }
-        value = beta;
+        return BoardHeuristic(board);
     }
-    return value;
+    
+    NSArray *children = board.childBoards;
+    if(maxing){
+        for(Board *child in children){
+            NSInteger newAlpha = alphabeta(child, depth - 1, NO);
+            alpha = MAX(alpha, newAlpha);
+        }
+        return alpha;
+    } else {
+        for(Board *child in children){
+            NSInteger newBeta = alphabeta(child, depth - 1, YES);
+            beta = MIN(beta, newBeta);
+        }
+        return beta;
+    }
 }
 
 
@@ -82,7 +77,8 @@ NSInteger alphabeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger be
     NSInteger bestScore = 0;
     Piece piece = MakePiece(board.currentPlayer, PositionMake(arc4random_uniform(boardSize), arc4random_uniform(boardSize)));
     for(Board *child in board.childBoards){
-        NSInteger alpha = alphabeta(child, 4, -1000000, 10000000, YES);
+        NSInteger alpha = BoardHeuristic(child);
+        NSLog(@"%li, %@", (long)alpha, child);
         if(alpha > bestScore){
             bestScore = alpha;
             piece = child.lastPiece;

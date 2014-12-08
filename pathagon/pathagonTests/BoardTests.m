@@ -12,6 +12,8 @@
 @interface Board (Tests)
 - (BOOL) pathExistsFrom:(Piece) start to:(Piece) finish;
 - (PieceList)connectedPieces:(Piece)piece;
+- (PieceList) allPieces;
+- (void) remove:(Piece)piece;
 @end
 
 @interface BoardTests : XCTestCase
@@ -28,6 +30,40 @@
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     [super tearDown];
+}
+
+- (void) testRemovesPieces {
+    Board * board = [Board new];
+    [board add:MakePiece(White, PositionMake(1, 2))];
+    NSLog(@"%@", board);
+    [board add:MakePiece(White, PositionMake(0, 1))];
+        NSLog(@"%@", board);
+    [board add:MakePiece(White, PositionMake(2, 3))];
+        NSLog(@"%@", board);
+    [board add:MakePiece(White, PositionMake(1, 3))];
+        NSLog(@"%@", board);
+    
+    [board add:MakePiece(Black, PositionMake(3, 4))];
+        NSLog(@"%@", board);
+    [board add:MakePiece(Black, PositionMake(2, 5))];
+        NSLog(@"%@", board);
+    [board add:MakePiece(Black, PositionMake(4, 5))];
+        NSLog(@"%@", board);
+    [board add:MakePiece(Black, PositionMake(2, 6))];
+        NSLog(@"%@", board);
+    
+    XCTAssertEqual([board allPieces].count, 8);
+    
+    [board remove:MakePiece(White, PositionMake(1, 2))];
+            NSLog(@"%@", board);
+    [board remove:MakePiece(White, PositionMake(0, 1))];
+            NSLog(@"%@", board);
+    [board remove:MakePiece(White, PositionMake(2, 3))];
+            NSLog(@"%@", board);
+    [board remove:MakePiece(White, PositionMake(1, 3))];
+            NSLog(@"%@", board);
+    
+    XCTAssertEqual([board allPieces].count, 4);
 }
 
 - (void)testPiecesTrappedBy {
