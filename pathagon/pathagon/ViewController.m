@@ -39,6 +39,9 @@
     self.boardView.board = board;
     __weak typeof(self) wself = self;
     self.boardView.onTap = ^(Position position){
+
+        wself.boardView.userInteractionEnabled = NO;
+
         Player player = [board currentPlayer];
         Piece piece = [board pieceAt:position];
         Piece highlighted = board.highlightedPiece;
@@ -51,7 +54,7 @@
             }
         }
 
-        else if(isPiece(highlighted) && [board canPlay:piece]){
+        if(isPiece(highlighted) && [board canPlay:piece]){
             [board move:board.highlightedPiece to:piece.position];
         }
 
@@ -65,9 +68,10 @@
 
         boardView.board = board;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            [wself.ai takeTurn:board];
+            Board *aiBoard = [wself.ai takeTurn:board];
             dispatch_async(dispatch_get_main_queue(), ^{
-                boardView.board = board;
+                boardView.board = aiBoard;
+                wself.boardView.userInteractionEnabled = YES;
             });
         });
     };

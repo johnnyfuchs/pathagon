@@ -8,7 +8,7 @@
 #import "BoardStructs.h"
 
 
-NSInteger BoardHeuristic(Board *board) {
+NSInteger BoardHeuristicA(Board *board) {
     if(!isPiece(board.lastPiece)) {
         return 0;
     }
@@ -30,29 +30,60 @@ NSInteger BoardHeuristic(Board *board) {
         Piece match = [board pieceAt:AddPositions(lastPiece.position, PositionForDirection(directions[i]))];
         if(match.player == lastPiece.player){
             touching += 10;
+        } else if(match.player == OtherPlayer(lastPiece.player)){
+            touching -= 5;
         }
     }
     return touching;
 }
 
-NSInteger alphabeta(Board *board, NSInteger depth, BOOL maxing){
-    NSInteger alpha = -100000000;
-    NSInteger beta = 100000000;
+NSInteger BoardHeuristicB(Board *board){
+    NSInteger score = 0;
+    if(!isPiece(board.lastPiece)) {
+        return 0;
+    }
+
+    Player player = board.lastPiece.player;
+    if(player == Black){
+        // black should maximize filled adjacent rows
+        for(int row =0; row < boardSize - 1; row++){
+            PieceList a = [board piecesInRow:row player:player];
+            PieceList b = [board piecesInRow:row + 1 player:player];
+            score = MAX(score, a.count + b.count);
+        }
+    } else {
+        // white should maximize filled adjacent cols
+        for(int col =0; col < boardSize - 1; col++){
+            PieceList a = [board piecesInCol:col player:player];
+            PieceList b = [board piecesInCol:col + 1 player:player];
+            score = MAX(score, a.count + b.count);
+        }
+    }
+    return score;
+}
+
+NSInteger alphaBeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger beta, BOOL maxing){
     if(!depth){
-        return BoardHeuristic(board);
+        return BoardHeuristicB(board);
     }
     
     NSArray *children = board.childBoards;
     if(maxing){
         for(Board *child in children){
-            NSInteger newAlpha = alphabeta(child, depth - 1, NO);
+            NSInteger newAlpha = alphaBeta(child, depth - 1, alpha, beta, NO);
             alpha = MAX(alpha, newAlpha);
+            if(beta <= alpha){
+                break;
+            }
         }
         return alpha;
     } else {
         for(Board *child in children){
-            NSInteger newBeta = alphabeta(child, depth - 1, YES);
+            NSInteger newBeta = alphaBeta(child, depth - 1, alpha, beta, YES);
             beta = MIN(beta, newBeta);
+            if(beta <= alpha){
+                break;
+            }
         }
         return beta;
     }
@@ -64,28 +95,27 @@ NSInteger alphabeta(Board *board, NSInteger depth, BOOL maxing){
     NSTimeInterval _startThinking;
 }
 
-- (void)takeTurn:(Board *)board {
-    Piece piece = [self idealPiece:board];
-    if([board canPlay:piece]){
-        [board add:piece];
-    }
+- (Board *)takeTurn:(Board *)board {
+    return [self idealChildBoard:board];
 }
 
-- (Piece) idealPiece:(Board *)board {
+- (Board *)idealChildBoard:(Board *)board {
     _startThinking = [NSDate timeIntervalSinceReferenceDate];
     _endThinking = 0;
     NSInteger bestScore = 0;
-    Piece piece = MakePiece(board.currentPlayer, PositionMake(arc4random_uniform(boardSize), arc4random_uniform(boardSize)));
+    Board *bestBoard;
     for(Board *child in board.childBoards){
-        NSInteger alpha = BoardHeuristic(child);
-        NSLog(@"%li, %@", (long)alpha, child);
+        if(!bestBoard){
+            bestBoard = child;
+        }
+        NSInteger alpha = alphaBeta(child, 2, -100000000, 100000000, YES);
         if(alpha > bestScore){
             bestScore = alpha;
-            piece = child.lastPiece;
+            board = child;
         }
     }
     _endThinking = [NSDate timeIntervalSinceReferenceDate];
-    return piece;
+    return board;
 }
 
 - (Piece) randomPiece:(Board *)board {

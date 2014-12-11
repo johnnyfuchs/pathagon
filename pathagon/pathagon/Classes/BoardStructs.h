@@ -10,6 +10,8 @@ static const int boardArea = boardSize * boardSize;
 
 enum Direction {
     N, S, E, W,
+    NE, SE,
+    NW, SW,
 };
 typedef enum Direction Direction;
 
@@ -19,7 +21,7 @@ enum Player {
 typedef enum Player Player;
 
 struct Position {
-    int x, y;
+    int8_t x, y;
 };
 typedef struct Position Position;
 
@@ -40,6 +42,10 @@ static inline Position PositionForDirection(Direction direction) {
         case S: return PositionMake(0, 1);
         case E: return PositionMake(1, 0);
         case W: return PositionMake(-1, 0);
+        case NE: return PositionMake(1, -1);
+        case NW: return PositionMake(-1, -1);
+        case SE: return PositionMake(1, 1);
+        case SW: return PositionMake(-1, 1);
     }
     return PositionMake(0, 0);
 }

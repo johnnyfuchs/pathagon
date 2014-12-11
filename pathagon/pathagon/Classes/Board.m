@@ -31,6 +31,12 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 - (void) add:(Piece)piece {
+    if (piecesPerPlayer - [self allPiecesForPlayer:piece.player].count > 0){
+        [self _add:piece];
+    }
+}
+
+- (void) _add:(Piece)piece {
     uint64_t intPiece = IntFromPosition(piece.position);
     if (_white & intPiece || _black & intPiece) {
         return;
@@ -158,6 +164,21 @@ static inline int PathHeuristic(Position a, Position b){
     return all;
 }
 
+- (PieceList) allPiecesForPlayer:(Player)player {
+    PieceList all = PieceListMake();
+    uint64_t playerPiece = player == White ? _white : _black;
+    for (int x=0; x<boardSize; x++){
+        for(int y=0; y<boardSize; y++){
+            Position pos = PositionMake(x, y);
+            uint64_t intPos = IntFromPosition(pos);
+            if(intPos & playerPiece){
+                PieceListAppend(&all, MakePiece(Black, pos));
+            }
+        }
+    }
+    return all;
+}
+
 - (PieceList)connectedPieces:(Piece)piece {
     PieceList all = PieceListMake();
     Direction directions[4] = {N, S, E, W};
@@ -205,15 +226,7 @@ static inline int PathHeuristic(Position a, Position b){
 }
 
 -(NSInteger) piecesLeftForPlayer:(Player)player {
-    NSInteger played = 0;
-    PieceList all = [self allPieces];
-    while (!PieceListIsEmpty(&all)) {
-        Piece piece = PieceListNextPiece(&all);
-        if (piece.player == player){
-            played++;
-        }
-    }
-    return piecesPerPlayer - played;
+    return piecesPerPlayer - [self allPiecesForPlayer:player].count;
 }
 
 
@@ -284,13 +297,28 @@ static inline int PathHeuristic(Position a, Position b){
     return pieces;
 }
 
+
 - (NSArray *) childBoards {
     NSMutableArray *boards = [NSMutableArray new];
-    PieceList playablePieces = [self playablePieces];
-    while(!PieceListIsEmpty(&playablePieces)){
-        Board *child = [self copy];
-        [child add:PieceListNextPiece(&playablePieces)];
-        [boards addObject:child];
+
+    PieceList onBoardPieces = [self allPiecesForPlayer:self.currentPlayer];
+    if (onBoardPieces.count >= piecesPerPlayer) {
+        while (!PieceListIsEmpty(&onBoardPieces)) {
+            Piece from = PieceListNextPiece(&onBoardPieces);
+            PieceList playablePieces = [self playablePieces];
+            while (!PieceListIsEmpty(&playablePieces)) {
+                Piece to = PieceListNextPiece(&playablePieces);
+                Board *child = [self copy];
+                [child move:from to:to.position];
+            }
+        }
+    } else {
+        PieceList playablePieces = [self playablePieces];
+        while(!PieceListIsEmpty(&playablePieces)){
+            Board *child = [self copy];
+            [child _add:PieceListNextPiece(&playablePieces)];
+            [boards addObject:child];
+        }
     }
     return boards;
 }

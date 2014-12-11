@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "BoardStructs.h"
 
-static const int piecesPerPlayer = 7;
+static const int piecesPerPlayer = 14;
 
 static const Player startingPlayer = White;
 
@@ -36,6 +36,10 @@ static const Player startingPlayer = White;
 - (NSInteger)piecesLeftForPlayer:(Player)player;
 
 - (BOOL)winExistsForPlayer:(Player)player;
+
+- (PieceList)piecesInRow:(int)row player:(Player)player;
+
+- (PieceList)piecesInCol:(int)col player:(Player)player;
 
 - (NSArray *)childBoards;
 

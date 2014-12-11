@@ -28,7 +28,7 @@
 
 - (void)testHueristicNoLastPiece {
     Board *b = [Board new];
-    XCTAssertEqual(BoardHeuristic(b), 0);
+    XCTAssertEqual(BoardHeuristicA(b), 0);
 }
 
 - (void)testHueristicWin {
@@ -38,7 +38,7 @@
         [b add:MakePiece(White, PositionMake(4, row))];
     }
     
-    XCTAssertEqual(BoardHeuristic(b), 99999);
+    XCTAssertEqual(BoardHeuristicA(b), 99999);
 }
 
 
@@ -57,7 +57,7 @@
     
     [board add:MakePiece(White, PositionMake(2, 2))];
     
-    XCTAssertEqual(BoardHeuristic(board), 400);
+    XCTAssertEqual(BoardHeuristicA(board), 400);
 }
 
 - (void)testPiecesTouching {
@@ -71,7 +71,7 @@
     
     [board add:MakePiece(Black, PositionMake(2, 2))];
     
-    XCTAssertEqual(BoardHeuristic(board), 40);
+    XCTAssertEqual(BoardHeuristicA(board), 40);
 }
 
 - (void) testChoosesACapture {
