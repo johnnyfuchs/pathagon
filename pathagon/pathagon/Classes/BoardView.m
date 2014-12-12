@@ -39,13 +39,13 @@ static inline BOOL altTile(int x, int y){
 - (void)handleTap:(UITapGestureRecognizer *)sender {
     CGPoint point = [sender locationInView:self];
     CGSize size = self.frame.size;
-    int col = (int) floor((point.x / size.width) * boardSize);
-    int row = (int) floor((point.y / size.height) * boardSize);
-    self.onTap(PositionMake(col, row));
+    uint8_t col = (uint8_t) floor((point.x / size.width) * boardSize);
+    uint8_t row = (uint8_t) floor((point.y / size.height) * boardSize);
+    self.onTap(self.board, PositionMake(col, row));
 }
 
 - (void)setBoard:(Board *)board {
-    _board = board;
+    _board = [board copy];
     [self refresh];
 }
 
@@ -56,8 +56,8 @@ static inline BOOL altTile(int x, int y){
     }
 
     Piece highlighted = [_board highlightedPiece];
-    for(int x=0; x < boardSize; x++){
-        for(int y=0; y < boardSize; y++){
+    for(uint8_t x=0; x < boardSize; x++){
+        for(uint8_t y=0; y < boardSize; y++){
             Position pos = PositionMake(x, y);
             UIColor *tileColor = altTile(x, y)? white : gray;
             UIView *tile = [self tileWithPosition:pos color:tileColor];

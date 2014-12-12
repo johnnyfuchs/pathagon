@@ -33,12 +33,10 @@
     [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateTimerLabel) userInfo:nil repeats:YES];
 
     self.ai = [AIPlayer new];
-    Board *board = [Board new];
-
     self.boardView = boardView;
-    self.boardView.board = board;
+    self.boardView.board = [Board new];
     __weak typeof(self) wself = self;
-    self.boardView.onTap = ^(Position position){
+    self.boardView.onTap = ^(Board *board, Position position){
 
         wself.boardView.userInteractionEnabled = NO;
 

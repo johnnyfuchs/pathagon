@@ -63,6 +63,8 @@ static inline int PathHeuristic(Position a, Position b){
         _black -= from;
         _black += to;
     }
+    piece.position = position;
+    _lastPiece = piece;
 }
 
 - (void) remove:(Piece) piece {
@@ -254,7 +256,7 @@ static inline int PathHeuristic(Position a, Position b){
 
 -(BOOL) winExistsForPlayer:(Player)player {
 
-    int lastRow = boardSize - 1;
+    uint8_t lastRow = boardSize - 1;
     PieceList startNodes = player == White ? [self piecesInRow:0 player:player] : [self piecesInCol:0 player:player];
     PieceList endNodes = player == White ? [self piecesInRow:lastRow player:player] : [self piecesInCol:lastRow player:player];
 
@@ -271,10 +273,10 @@ static inline int PathHeuristic(Position a, Position b){
     return NO;
 }
 
--(PieceList) piecesInRow:(int)row player:(Player)player {
+-(PieceList) piecesInRow:(uint8_t)row player:(Player)player {
     PieceList pieces = PieceListMake();
     uint64_t playerInt = player == White ? _white : _black;
-    for(int col=0; col < boardSize; col++){
+    for(uint8_t col=0; col < boardSize; col++){
         Position pos = PositionMake(col, row);
         uint64_t pieceInt = IntFromPosition(pos);
         if(pieceInt &  playerInt){
@@ -284,10 +286,10 @@ static inline int PathHeuristic(Position a, Position b){
     return pieces;
 }
 
--(PieceList) piecesInCol:(int)col player:(Player)player {
+-(PieceList) piecesInCol:(uint8_t)col player:(Player)player {
     PieceList pieces = PieceListMake();
     uint64_t playerInt = player == White ? _white : _black;
-    for(int row=0; row < boardSize; row++){
+    for(uint8_t row=0; row < boardSize; row++){
         Position pos = PositionMake(col, row);
         uint64_t pieceInt = IntFromPosition(pos);
         if(pieceInt &  playerInt){
@@ -330,9 +332,9 @@ static inline int PathHeuristic(Position a, Position b){
     [o appendString:@"\n"];
     [o appendString:bar];
     [o appendString:@"\n"];
-    for (int y=0; y<boardSize; y++){
+    for (uint8_t y=0; y<boardSize; y++){
         [o appendString:@"|"];
-        for(int x=0; x<boardSize; x++) {
+        for(uint8_t x=0; x<boardSize; x++) {
             Position pos = PositionMake(x, y);
             Piece piece = [self pieceAt:pos];
             if(isPiece(piece)){
@@ -354,6 +356,7 @@ static inline int PathHeuristic(Position a, Position b){
     board.blackRemoved = _blackRemoved;
     board.whiteRemoved = _whiteRemoved;
     board.highlight = _highlight;
+    board.lastPiece = _lastPiece;
     return board;
 }
 

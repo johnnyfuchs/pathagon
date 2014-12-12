@@ -32,7 +32,7 @@ struct Piece {
 typedef struct Piece Piece;
 
 
-static inline Position PositionMake(int x, int y){
+static inline Position PositionMake(int8_t x, int8_t y){
     Position pos; pos.x = x; pos.y = y; return pos;
 }
 
@@ -62,7 +62,7 @@ static inline Position PositionFromInt(uint64_t intPos){
     int base = (int) log2(intPos);
     int y = base % boardSize;
     int x = (base - y) / boardSize;
-    return PositionMake(x, y);
+    return PositionMake((int8_t) x, (int8_t) y);
 }
 
 static inline Player OtherPlayer(Player player) {

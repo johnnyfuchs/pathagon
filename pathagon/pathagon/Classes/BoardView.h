@@ -11,5 +11,5 @@
 
 @interface BoardView : UIView
 @property (nonatomic, strong) Board *board;
-@property (nonatomic, copy) void (^onTap)(Position position);
+@property (nonatomic, copy) void (^onTap)(Board *, Position position);
 @end

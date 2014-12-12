@@ -104,18 +104,19 @@ NSInteger alphaBeta(Board *board, NSInteger depth, NSInteger alpha, NSInteger be
     _endThinking = 0;
     NSInteger bestScore = 0;
     Board *bestBoard;
+
     for(Board *child in board.childBoards){
         if(!bestBoard){
-            bestBoard = child;
+            bestBoard = [child copy];
         }
         NSInteger alpha = alphaBeta(child, 4, -100000000, 100000000, YES);
         if(alpha > bestScore){
             bestScore = alpha;
-            board = child;
+            bestBoard = [child copy];
         }
     }
     _endThinking = [NSDate timeIntervalSinceReferenceDate];
-    return board;
+    return bestBoard;
 }
 
 - (Piece) randomPiece:(Board *)board {

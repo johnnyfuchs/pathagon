@@ -15,7 +15,7 @@ static const Player startingPlayer = White;
 
 @interface Board : NSObject <NSCopying>
 @property (nonatomic, copy) void (^onWin)(Player player);
-@property (nonatomic, readonly) Piece lastPiece;
+@property (nonatomic) Piece lastPiece;
 
 - (Player)currentPlayer;
 
@@ -37,9 +37,9 @@ static const Player startingPlayer = White;
 
 - (BOOL)winExistsForPlayer:(Player)player;
 
-- (PieceList)piecesInRow:(int)row player:(Player)player;
+- (PieceList)piecesInRow:(uint8_t)row player:(Player)player;
 
-- (PieceList)piecesInCol:(int)col player:(Player)player;
+- (PieceList)piecesInCol:(uint8_t)col player:(Player)player;
 
 - (NSArray *)childBoards;
 
